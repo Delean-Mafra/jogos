@@ -1,0 +1,1550 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jornada Épica</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .pulse {
+            animation: pulse 1.5s infinite;
+        }
+        .dice-roll {
+            animation: diceRoll 0.5s ease-out;
+        }
+        @keyframes diceRoll {
+            0% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(90deg) scale(1.2); }
+            50% { transform: rotate(180deg) scale(1.3); }
+            75% { transform: rotate(270deg) scale(1.2); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+        .bg-fantasy {
+            background-image: url('https://images.unsplash.com/photo-1542273917363-3b1817f69a2b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        .text-outline {
+            text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .dragon-gif {
+            width: 300px;
+            height: 200px;
+            margin: 0 auto;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+    </style>
+</head>
+<body class="bg-fantasy min-h-screen text-white font-serif">
+    <div id="game-container" class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- Character Creation Screen -->
+        <div id="character-creation" class="bg-black bg-opacity-70 rounded-lg p-6 shadow-xl fade-in">
+            <h1 class="text-4xl font-bold text-center mb-6 text-yellow-400 text-outline">Jornada Épica</h1>
+            <h2 class="text-2xl font-semibold text-center mb-4 text-yellow-300">Criação de Personagem</h2>
+            
+            <div class="mb-6">
+                <label for="character-name" class="block text-lg mb-2">Nome do Aventureiro:</label>
+                <input type="text" id="character-name" class="w-full px-4 py-2 rounded bg-gray-800 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500" placeholder="Digite seu nome">
+            </div>
+            
+            <div class="mb-6">
+                <label class="block text-lg mb-2">Classe:</label>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <button class="class-btn px-4 py-2 rounded bg-gray-800 hover:bg-yellow-700 border border-gray-600 transition-all" data-class="Guerreiro">
+                        <i class="fas fa-sword mr-2"></i> Guerreiro
+                    </button>
+                    <button class="class-btn px-4 py-2 rounded bg-gray-800 hover:bg-blue-700 border border-gray-600 transition-all" data-class="Paladino">
+                        <i class="fas fa-shield-alt mr-2"></i> Paladino
+                    </button>
+                    <button class="class-btn px-4 py-2 rounded bg-gray-800 hover:bg-green-700 border border-gray-600 transition-all" data-class="Bardo">
+                        <i class="fas fa-music mr-2"></i> Bardo
+                    </button>
+                    <button class="class-btn px-4 py-2 rounded bg-gray-800 hover:bg-purple-700 border border-gray-600 transition-all" data-class="Mago">
+                        <i class="fas fa-hat-wizard mr-2"></i> Mago
+                    </button>
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <label class="block text-lg mb-2">Distribua seus pontos (10 pontos totais):</label>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                    <div class="attribute-control">
+                        <label class="block mb-1">Força</label>
+                        <div class="flex items-center">
+                            <button class="decrement-btn px-2 py-1 bg-red-700 rounded-l" data-attr="strength">-</button>
+                            <span id="strength-value" class="px-4 py-1 bg-gray-800">3</span>
+                            <button class="increment-btn px-2 py-1 bg-red-700 rounded-r" data-attr="strength">+</button>
+                        </div>
+                    </div>
+                    <div class="attribute-control">
+                        <label class="block mb-1">Destreza</label>
+                        <div class="flex items-center">
+                            <button class="decrement-btn px-2 py-1 bg-blue-700 rounded-l" data-attr="dexterity">-</button>
+                            <span id="dexterity-value" class="px-4 py-1 bg-gray-800">3</span>
+                            <button class="increment-btn px-2 py-1 bg-blue-700 rounded-r" data-attr="dexterity">+</button>
+                        </div>
+                    </div>
+                    <div class="attribute-control">
+                        <label class="block mb-1">Vigor</label>
+                        <div class="flex items-center">
+                            <button class="decrement-btn px-2 py-1 bg-green-700 rounded-l" data-attr="stamina">-</button>
+                            <span id="stamina-value" class="px-4 py-1 bg-gray-800">2</span>
+                            <button class="increment-btn px-2 py-1 bg-green-700 rounded-r" data-attr="stamina">+</button>
+                        </div>
+                    </div>
+                    <div class="attribute-control">
+                        <label class="block mb-1">Charme</label>
+                        <div class="flex items-center">
+                            <button class="decrement-btn px-2 py-1 bg-purple-700 rounded-l" data-attr="charm">-</button>
+                            <span id="charm-value" class="px-4 py-1 bg-gray-800">2</span>
+                            <button class="increment-btn px-2 py-1 bg-purple-700 rounded-r" data-attr="charm">+</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <span id="points-remaining" class="font-bold">Pontos restantes: 0</span>
+                </div>
+            </div>
+            
+            <div class="text-center">
+                <button id="start-game-btn" class="px-6 py-3 bg-yellow-600 hover:bg-yellow-700 rounded-lg font-bold text-lg transition-all transform hover:scale-105">
+                    <i class="fas fa-play mr-2"></i> Começar Jornada
+                </button>
+            </div>
+        </div>
+        
+        <!-- Main Game Screen (initially hidden) -->
+        <div id="game-screen" class="hidden bg-black bg-opacity-70 rounded-lg p-6 shadow-xl fade-in">
+            <!-- Character Info Bar -->
+            <div class="flex flex-wrap justify-between items-center mb-6 p-3 bg-gray-900 rounded-lg">
+                <div class="mb-2 md:mb-0">
+                    <h2 id="character-info" class="text-xl font-bold text-yellow-400"></h2>
+                </div>
+                <div class="flex space-x-4">
+                    <div class="text-center">
+                        <span class="block text-sm">Moedas</span>
+                        <span id="coins" class="font-bold text-yellow-300">0</span>
+                    </div>
+                    <div class="text-center">
+                        <span class="block text-sm">Vida</span>
+                        <span id="health" class="font-bold text-red-400">10/10</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Inventory -->
+            <div id="inventory-container" class="mb-6 hidden">
+                <h3 class="text-lg font-semibold mb-2">Inventário:</h3>
+                <div id="inventory" class="flex flex-wrap gap-2">
+                    <!-- Items will be added here dynamically -->
+                </div>
+            </div>
+            
+            <!-- Story Text -->
+            <div id="story-text" class="mb-6 p-4 bg-gray-800 rounded-lg h-48 overflow-y-auto scrollbar-hide">
+                <!-- Story content will be added here dynamically -->
+            </div>
+            
+            <!-- Dice Roll Display -->
+            <div id="dice-container" class="hidden mb-6 text-center">
+                <div class="inline-block bg-gray-800 p-4 rounded-lg">
+                    <div class="flex items-center justify-center">
+                        <span id="dice-result" class="text-4xl font-bold mx-4">?</span>
+                        <span id="dice-bonus" class="text-xl"></span>
+                    </div>
+                    <div class="mt-2">
+                        <span id="dice-total" class="text-xl font-semibold"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div id="action-buttons" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Buttons will be added here dynamically -->
+            </div>
+            
+            <!-- Location Specific UI -->
+            <div id="location-ui" class="mt-6 hidden">
+                <!-- Location specific content will be added here -->
+            </div>
+
+            <!-- Dragon GIF -->
+            <div id="dragon-gif" class="dragon-gif hidden" style="background-image: url('https://usagif.com/wp-content/uploads/gifs/dragon-6.gif')"></div>
+
+            <!-- Queen Battle Input -->
+            <div id="queen-battle-input" class="hidden mt-4">
+                <div class="bg-gray-800 p-4 rounded-lg">
+                    <p id="queen-battle-text" class="mb-4">Você tem a varinha mágica! Onde você vai direcionar seu ataque?</p>
+                    <input type="text" id="queen-target-input" class="w-full px-4 py-2 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Digite seu alvo...">
+                    <button id="queen-attack-btn" class="mt-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg font-medium">Atacar</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Game Over Screen (initially hidden) -->
+        <div id="game-over" class="hidden bg-black bg-opacity-80 rounded-lg p-6 shadow-xl text-center fade-in">
+            <h1 class="text-5xl font-bold text-red-600 mb-4">GAME OVER</h1>
+            <div id="game-over-text" class="text-xl mb-6">
+                <!-- Game over text will be added here -->
+            </div>
+            <button id="restart-btn" class="px-6 py-3 bg-red-600 hover:bg-red-700 rounded-lg font-bold text-lg transition-all transform hover:scale-105">
+                <i class="fas fa-redo mr-2"></i> Recomeçar
+            </button>
+        </div>
+        
+        <!-- Season Complete Screen (initially hidden) -->
+        <div id="season-complete" class="hidden bg-black bg-opacity-80 rounded-lg p-6 shadow-xl text-center fade-in">
+            <h1 class="text-5xl font-bold text-green-500 mb-4">TEMPORADA COMPLETA!</h1>
+            <div id="season-complete-text" class="text-xl mb-6">
+                <!-- Season complete text will be added here -->
+            </div>
+            <div id="season-rewards" class="mb-6">
+                <!-- Rewards will be added here -->
+            </div>
+            <button id="next-season-btn" class="px-6 py-3 bg-green-600 hover:bg-green-700 rounded-lg font-bold text-lg transition-all transform hover:scale-105">
+                <i class="fas fa-arrow-right mr-2"></i> Continuar para Temporada 2
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Game State
+        const gameState = {
+            season: 1,
+            name: '',
+            class: '',
+            attributes: {
+                strength: 3,
+                dexterity: 3,
+                stamina: 2,
+                charm: 2
+            },
+            maxHealth: 10,
+            currentHealth: 10,
+            coins: 0,
+            inventory: ['Guitarra'],
+            currentScene: 'forestAmbush',
+            knowsDragonWeakness: false,
+            hasElfPassword: false,
+            visitedLocations: [],
+            completedQuests: [],
+            defeatedEnemies: [],
+            purchasedItems: [],
+            merchantLines: [
+                "Over here, stranger.",
+                "Welcome!",
+                "HEHEHEA! Thank you.",
+                "What are ya buyin'?",
+                "What are ya sellin'?",
+                "Got a selection of good things on sale, stranger!",
+                "Ah, I'll buy it at a high price!",
+                "Is that all, stranger?",
+                "Come back anytime!",
+                "Not enough cash, stranger!"
+            ]
+        };
+
+        // Scenes and their options
+        const scenes = {
+            // Season 1
+            forestAmbush: {
+                text: "Você e seus companheiros estão atravessando uma floresta encantada quando, de repente, são emboscados por um exército de goblins! Os pequenos seres verdes surgem dos arbustos com armas enferrujadas e olhos famintos por sangue. Seus companheiros se preparam para lutar, mas você precisa decidir rapidamente como reagir a essa ameaça.",
+                options: [
+                    { text: "Atacar os goblins", action: "attackGoblins", attr: "strength", difficulty: 8 },
+                    { text: "Tentar encantar os goblins", action: "charmGoblins", attr: "charm", difficulty: 12 },
+                    { text: "Fugir do confronto", action: "fleeGoblins", attr: "stamina", difficulty: 10 },
+                    { text: "Se esconder dos goblins", action: "hideFromGoblins", attr: "dexterity", difficulty: 10 }
+                ]
+            },
+            mysteriousBush: {
+                text: "Sobrevivendo ao encontro com os goblins, você segue seu caminho em direção à cidade. O sol começa a se pôr, lançando sombras longas pela floresta. De repente, você nota uma movimentação estranha em um arbusto à sua frente. Algo - ou alguém - parece estar observando você de lá.",
+                options: [
+                    { text: "Jogar uma pedra no arbusto", action: "throwRockAtBush", attr: "strength", difficulty: 0 },
+                    { text: "Tentar encantar o arbusto", action: "charmBush", attr: "charm", difficulty: 10 },
+                    { text: "Ignorar e seguir em frente", action: "ignoreBush", attr: "stamina", difficulty: 8 },
+                    { text: "Atacar o arbusto", action: "attackBush", attr: "strength", difficulty: 0 }
+                ]
+            },
+            elfEncounter: {
+                text: "Ao tentar encantar o arbusto, uma figura esguia e graciosa emerge. É uma elfa, com olhos brilhantes e cabelos como fios de prata. Ela parece tanto curiosa quanto cautelosa com sua presença. 'Por que um humano tentaria encantar um simples arbusto?', ela pergunta com uma voz melodiosa.",
+                options: [
+                    { text: "Atacar a elfa", action: "attackElf", attr: "strength", difficulty: 15 },
+                    { text: "Tentar encantá-la", action: "charmElf", attr: "charm", difficulty: 12 },
+                    { text: "Conversar com ela", action: "talkToElf", attr: "charm", difficulty: 10 },
+                    { text: "Fazer um gesto ousado", action: "flirtWithElf", attr: "charm", difficulty: 14 }
+                ]
+            },
+            townArrival: {
+                text: "Finalmente, você chega à cidade. O portão de madeira maciça está aberto, guardado por dois soldados que observam os visitantes com desconfiança. Dentro, as ruas de pedra estão cheias de vida - mercadores anunciando suas mercadorias, crianças brincando, e trabalhadores indo e vindo. O cheiro de pão fresco e carne assada enche o ar. Onde você gostaria de ir primeiro?",
+                options: [
+                    { text: "Mercado", action: "goToMarket" },
+                    { text: "Ferreiro", action: "goToBlacksmith" },
+                    { text: "Artesão", action: "goToArtisan" },
+                    { text: "Arena", action: "goToArena" },
+                    { text: "Taberna", action: "goToTavern" }
+                ]
+            },
+            market: {
+                text: "O mercado está repleto de barracas coloridas e o burburinho de negociações. Um mercador estrangeiro com roupas exóticas chama sua atenção. Ele fala em um idioma que você não compreende, mas gesticula em direção a seus produtos. Um intérprete ao lado parece disposto a ajudar... por um preço.",
+                options: [
+                    { text: "Contratar intérprete (1 moeda)", action: "hireInterpreter", cost: 1, hideIfPurchased: "intérprete" },
+                    { text: "Comprar maçã (1 moeda)", action: "buyApple", cost: 1, hideIfPurchased: "Maçã" },
+                    { text: "Pedir uma poção (requer Vigor ≥ 5)", action: "askForPotion", attrCheck: { attr: "stamina", min: 5 }, hideIfPurchased: "poção" },
+                    { text: "Deixar o mercado", action: "leaveMarket" }
+                ]
+            },
+            blacksmith: {
+                text: "A forja do ferreiro está quente e barulhenta, com o som de martelos batendo no metal ecoando pelas paredes de pedra. O ferreiro, um homem corpulento com braços musculosos, para de trabalhar quando você entra. 'O que você precisa, aventureiro? Tenho alguns itens que podem te interessar.'",
+                options: [
+                    { text: "Trocar Guitarra por Escudo", action: "tradeForShield", hideIfPurchased: "Escudo" },
+                    { text: "Comprar Quickpack (1 moeda)", action: "buyQuickpack", cost: 1, hideIfPurchased: "Quickpack" },
+                    { text: "Deixar a loja", action: "leaveBlacksmith" }
+                ]
+            },
+            artisan: {
+                text: "A oficina do artesão é um lugar tranquilo, cheio de belas peças de cerâmica e madeira trabalhada. A filha do artesão, uma jovem de cabelos escuros e mãos hábeis, está no balcão. Ela sorri timidamente quando você entra. 'Bem-vindo, posso te ajudar com algo?'",
+                options: [
+                    { text: "Comprar vaso de cerâmica (1 moeda)", action: "buyVase", cost: 1, hideIfPurchased: "Vaso de Cerâmica" },
+                    { text: "Tentar encantar a jovem", action: "charmArtisan", attr: "charm", difficulty: 12, hideIfPurchased: "Vaso de Cerâmica" },
+                    { text: "Deixar a oficina", action: "leaveArtisan" }
+                ]
+            },
+            arena: {
+                text: "A arena é um grande círculo de areia cercado por arquibancadas de madeira. Alguns espectadores assistem aos combates enquanto apostam e bebem. O mestre da arena se aproxima. 'Quer testar suas habilidades? Temos três desafios hoje: Ragnar, o Bárbaro; Eldrin, o Mago; e Sylas, o Arqueiro. Quem você quer enfrentar?'",
+                options: [
+                    { text: "Lutar contra Ragnar (Bárbaro)", action: "startArenaBattle", enemy: "Ragnar" },
+                    { text: "Lutar contra Eldrin (Mago)", action: "startArenaBattle", enemy: "Eldrin" },
+                    { text: "Lutar contra Sylas (Arqueiro)", action: "startArenaBattle", enemy: "Sylas" },
+                    { text: "Deixar a arena", action: "leaveArena" }
+                ]
+            },
+            tavern: {
+                text: "A taberna 'O Porco Embriagado' está cheia de fumaça, risadas e o cheiro de cerveja derramada. Quando você entra, alguns olhares hostis se voltam para você, especialmente quando notam sua classe. Um grupo de canalhas no canto parece particularmente interessado em você. O que você faz?",
+                options: [
+                    { text: "Atacar os canalhas (requer Escudo)", action: "attackThugs", itemRequired: "Escudo" },
+                    { text: "Tocar música (requer Guitarra)", action: "playMusic", itemRequired: "Guitarra" },
+                    { text: "Comprar um hidromel (1 moeda)", action: "buyMead", cost: 1 },
+                    { text: "Sair da taberna", action: "leaveTavern" }
+                ]
+            },
+            
+            // Season 2
+            season2Start: {
+                text: "TEMPORADA 2: A PRISIONEIRA DA RAINHA BRANCA\n\nApós os eventos da primeira temporada, você recebe uma nova missão: a Princesa Eilonwy foi aprisionada pela temida Rainha Branca. Há uma generosa recompensa para quem a resgatar. Ao se despedir de seus pais adotivos, você recebe uma Espada Ancestral que pertenceu a seu avô. A lâmina brilha suavemente em sua mão, e você sente sua Força aumentar.\n\nNo entanto, a tragédia atinge quando Seraphina, o Dragão Ancestral Carmesim, ataca sua cidade natal! O mesmo dragão cujo segredo você pode ter descoberto na taberna. As chamas consomem tudo, e embora você não consiga salvar sua família, sobrevive e jura vingança. Você automaticamente evolui, ganhando um ponto em todos os seus atributos.",
+                options: [
+                    { text: "Continuar para a Fortaleza", action: "goToFortress" }
+                ]
+            },
+            fortressApproach: {
+                text: "A Fortaleza da Rainha Branca se ergue imponente no horizonte, suas torres brancas brilhando sob o sol. Você sabe que a princesa está lá dentro, mas entrar não será fácil. Dois caminhos se apresentam a você:",
+                options: [
+                    { text: "Entrar pelos esgotos (furtivo)", action: "enterSewers" },
+                    { text: "Atravessar a ponte (direto)", action: "crossBridge", itemRequired: "Escudo" }
+                ]
+            },
+            sewerEncounter: {
+                text: "Os esgotos são escuros, úmidos e fedorentos. Você avança cuidadosamente, mas de repente uma figura petrificante bloqueia seu caminho - é Euríale, a Górgona! Seus olhos brilham mesmo na escuridão, e seus cabelos de serpentes sibilam em sua direção. 'Ninguém passa por aqui...', ela sussurra com uma voz que parece vir de várias direções ao mesmo tempo.",
+                options: [
+                    { text: "Lutar contra a Górgona", action: "fightGorgon", attr: "strength", difficulty: 14 },
+                    { text: "Tentar enganá-la", action: "trickGorgon", attr: "charm", difficulty: 16 },
+                    { text: "Fugir de volta", action: "fleeGorgon", attr: "stamina", difficulty: 12 }
+                ]
+            },
+            bridgeEncounter: {
+                text: "A ponte levadiça está abaixada, mas dois guardas imponentes em armaduras brancas bloqueiam a entrada. Eles cruzam suas lanças quando você se aproxima. 'Ninguém entra na Fortaleza sem autorização da Rainha!', um deles diz com voz firme. Você percebe que eles não vão se mover facilmente.",
+                options: [
+                    { text: "Lutar contra os guardas", action: "fightGuards", attr: "strength", difficulty: 12 },
+                    { text: "Tentar convencê-los", action: "convinceGuards", attr: "charm", difficulty: 14 },
+                    { text: "Recuar", action: "retreatFromBridge", attr: "dexterity", difficulty: 10 }
+                ]
+            },
+            fortressInside: {
+                text: "Você consegue entrar na fortaleza! Os corredores são amplos e frios, com paredes de mármore branco decoradas com tapeçarias azuis. Você avança silenciosamente, evitando patrulhas, até encontrar uma porta trancada com um mecanismo de combinação. Uma placa acima diz: 'Apenas os dignos podem passar'.",
+                options: [
+                    { text: "Tentar abrir a porta", action: "tryDoor" },
+                    { text: "Procurar outra entrada", action: "searchAlternative", attr: "dexterity", difficulty: 18 }
+                ]
+            },
+            secretRoom: {
+                text: "A porta se abre revelando uma sala secreta iluminada por uma luz suave e azulada. No centro, em um pedestal de cristal, repousa uma Varinha Mágica que emana um poder antigo. Você se aproxima, sentindo a energia mágica no ar. O que você faz?",
+                options: [
+                    { text: "Pegar a varinha", action: "takeWand" },
+                    { text: "Encantar a maçã (se tiver uma)", action: "enchantApple", itemRequired: "Maçã" },
+                    { text: "Sair da sala", action: "leaveSecretRoom" }
+                ]
+            },
+            dragonBattle: {
+                text: "Você entra no grande salão do trono e vê a terrível Seraphina, o Dragão Ancestral Carmesim, descansando sobre uma pilha de tesouros. Seus olhos se abrem quando você entra, e ela levanta seu enorme corpo, soltando um rugido que faz o chão tremer. 'Mais um aventureiro tolo vem desafiar-me?', ela diz com uma voz que ecoa como trovão.",
+                options: [
+                    { text: "Atacar o dragão", action: "fightDragon" },
+                    { text: "Fugir", action: "fleeDragon", attr: "stamina", difficulty: 20 }
+                ]
+            },
+            queenBattle: {
+                text: "Após derrotar o dragão, você avança para a câmara mais interna da fortaleza. Lá, em um trono de gelo, está a Rainha Branca. Ela é uma figura majestosa e terrível, com cabelos brancos como neve e olhos que brilham com uma luz sobrenatural. Uma esmeralda brilhante está incrustada em sua coroa. 'Você ousa desafiar-me em meu próprio domínio?', ela diz com uma voz que parece vir de todos os lados ao mesmo tempo.",
+                options: [
+                    { text: "Enfrentar a Rainha", action: "fightQueen" }
+                ]
+            }
+        };
+
+        // Arena Battle System
+        const arenaEnemies = {
+            Ragnar: {
+                name: "Ragnar, o Bárbaro",
+                maxHealth: 18,
+                health: 18,
+                attack: 5,
+                defense: 2,
+                gif: "https://i.gifer.com/SeFF.gif"
+            },
+            Eldrin: {
+                name: "Eldrin, o Mago",
+                maxHealth: 14,
+                health: 14,
+                attack: 4,
+                defense: 3,
+                gif: "https://pa1.aminoapps.com/6303/f16bc77e59340f0cb833eba227d2f57ebc684948_hq.gif"
+            },
+            Sylas: {
+                name: "Sylas, o Arqueiro",
+                maxHealth: 12,
+                health: 12,
+                attack: 3,
+                defense: 4,
+                gif: "https://i.pinimg.com/originals/6a/b2/7d/6ab27d9f98e72cd8129b840ecf33519a.gif"
+            }
+        };
+
+        let currentArenaBattle = null;
+
+        function showArenaBattle(enemyKey) {
+            const enemy = JSON.parse(JSON.stringify(arenaEnemies[enemyKey]));
+            currentArenaBattle = {
+                enemyKey,
+                enemy,
+                playerHealth: gameState.currentHealth,
+                playerMaxHealth: gameState.maxHealth,
+                turn: "player"
+            };
+
+            document.getElementById('story-text').innerHTML = `
+                <div class="flex flex-col md:flex-row items-center mb-4">
+                    <img src="${enemy.gif}" alt="${enemy.name}" class="w-48 h-40 object-contain rounded-lg mb-4 md:mb-0 md:mr-6 border-4 border-yellow-700 shadow-lg" />
+                    <div>
+                        <h2 class="text-2xl font-bold text-yellow-300 mb-2">${enemy.name}</h2>
+                        <div class="mb-2"><span class="font-bold">Vida do Oponente:</span> <span id="arena-enemy-health">${enemy.health}</span> / ${enemy.maxHealth}</div>
+                        <div class="mb-2"><span class="font-bold">Ataque:</span> ${enemy.attack} &nbsp; <span class="font-bold">Defesa:</span> ${enemy.defense}</div>
+                        <div class="mb-2"><span class="font-bold">Sua Vida:</span> <span id="arena-player-health">${currentArenaBattle.playerHealth}</span> / ${currentArenaBattle.playerMaxHealth}</div>
+                    </div>
+                </div>
+                <div id="arena-battle-log" class="mb-4 p-2 bg-gray-900 rounded h-32 overflow-y-auto scrollbar-hide"></div>
+            `;
+
+            const actionButtonsEl = document.getElementById('action-buttons');
+            actionButtonsEl.innerHTML = '';
+            addArenaBattleActions();
+        }
+
+        function addArenaBattleActions() {
+            const actionButtonsEl = document.getElementById('action-buttons');
+            actionButtonsEl.innerHTML = '';
+
+            if (!currentArenaBattle) return;
+
+            if (currentArenaBattle.turn === "player") {
+                // Atacar
+                const attackBtn = document.createElement('button');
+                attackBtn.className = 'px-4 py-3 bg-red-700 hover:bg-red-800 rounded-lg font-medium transition-all transform hover:scale-105';
+                attackBtn.textContent = "Atacar";
+                attackBtn.onclick = async () => {
+                    const roll = rollDice();
+                    const bonus = gameState.attributes.strength;
+                    const total = roll + bonus;
+                    const log = document.getElementById('arena-battle-log');
+                    log.innerHTML += `<div class="text-yellow-200">Você tenta atacar (${roll} + Força ${bonus})...</div>`;
+                    if (total >= 10 + currentArenaBattle.enemy.defense) {
+                        const damage = Math.max(2 + Math.floor(bonus / 2), 1);
+                        currentArenaBattle.enemy.health -= damage;
+                        log.innerHTML += `<div class="text-green-400">Acertou! Você causou ${damage} de dano.</div>`;
+                    } else {
+                        log.innerHTML += `<div class="text-red-400">Você errou o ataque!</div>`;
+                    }
+                    updateArenaBattleStatus();
+                    setTimeout(() => {
+                        currentArenaBattle.turn = "enemy";
+                        addArenaBattleActions();
+                        arenaEnemyTurn();
+                    }, 800);
+                };
+                actionButtonsEl.appendChild(attackBtn);
+
+                // Defender
+                const defendBtn = document.createElement('button');
+                defendBtn.className = 'px-4 py-3 bg-blue-700 hover:bg-blue-800 rounded-lg font-medium transition-all transform hover:scale-105';
+                defendBtn.textContent = "Defender";
+                defendBtn.onclick = async () => {
+                    currentArenaBattle.defending = true;
+                    const log = document.getElementById('arena-battle-log');
+                    log.innerHTML += `<div class="text-blue-300">Você se prepara para se defender!</div>`;
+                    updateArenaBattleStatus();
+                    setTimeout(() => {
+                        currentArenaBattle.turn = "enemy";
+                        addArenaBattleActions();
+                        arenaEnemyTurn();
+                    }, 800);
+                };
+                actionButtonsEl.appendChild(defendBtn);
+
+                // Refletir Ataque
+                const reflectBtn = document.createElement('button');
+                reflectBtn.className = 'px-4 py-3 bg-purple-700 hover:bg-purple-800 rounded-lg font-medium transition-all transform hover:scale-105';
+                reflectBtn.textContent = "Refletir Ataque";
+                reflectBtn.onclick = async () => {
+                    const roll = rollDice();
+                    const bonus = gameState.attributes.dexterity;
+                    const total = roll + bonus;
+                    const log = document.getElementById('arena-battle-log');
+                    log.innerHTML += `<div class="text-purple-200">Você tenta refletir o ataque (${roll} + Destreza ${bonus})...</div>`;
+                    if (total >= 15) {
+                        const reflectDmg = Math.floor(currentArenaBattle.enemy.attack / 2) + 1;
+                        currentArenaBattle.enemy.health -= reflectDmg;
+                        log.innerHTML += `<div class="text-green-400">Sucesso! Você refletiu ${reflectDmg} de dano ao oponente.</div>`;
+                    } else {
+                        log.innerHTML += `<div class="text-red-400">Falhou ao refletir o ataque!</div>`;
+                    }
+                    updateArenaBattleStatus();
+                    setTimeout(() => {
+                        currentArenaBattle.turn = "enemy";
+                        addArenaBattleActions();
+                        arenaEnemyTurn();
+                    }, 800);
+                };
+                actionButtonsEl.appendChild(reflectBtn);
+
+                // Fugir
+                const fleeBtn = document.createElement('button');
+                fleeBtn.className = 'px-4 py-3 bg-gray-700 hover:bg-gray-800 rounded-lg font-medium transition-all transform hover:scale-105';
+                fleeBtn.textContent = "Desistir do combate";
+                fleeBtn.onclick = () => {
+                    addToStory("Você desiste do combate e deixa a arena sob vaias da plateia.");
+                    currentArenaBattle = null;
+                    showScene('arena');
+                };
+                actionButtonsEl.appendChild(fleeBtn);
+            } else {
+                // Espera turno do inimigo
+                const waitBtn = document.createElement('button');
+                waitBtn.className = 'px-4 py-3 bg-gray-900 text-gray-400 rounded-lg font-medium cursor-not-allowed';
+                waitBtn.textContent = "Aguardando ação do oponente...";
+                waitBtn.disabled = true;
+                actionButtonsEl.appendChild(waitBtn);
+            }
+        }
+
+        function updateArenaBattleStatus() {
+            if (!currentArenaBattle) return;
+            document.getElementById('arena-enemy-health').textContent = Math.max(currentArenaBattle.enemy.health, 0);
+            document.getElementById('arena-player-health').textContent = Math.max(currentArenaBattle.playerHealth, 0);
+        }
+
+        function arenaEnemyTurn() {
+            if (!currentArenaBattle) return;
+            setTimeout(() => {
+                const log = document.getElementById('arena-battle-log');
+                if (currentArenaBattle.enemy.health <= 0) {
+                    log.innerHTML += `<div class="text-green-300 font-bold">Você venceu o combate!</div>`;
+                    finishArenaBattle(true);
+                    return;
+                }
+                if (currentArenaBattle.playerHealth <= 0) {
+                    log.innerHTML += `<div class="text-red-300 font-bold">Você foi derrotado!</div>`;
+                    finishArenaBattle(false);
+                    return;
+                }
+                // Ataque do inimigo
+                const roll = rollDice();
+                const bonus = currentArenaBattle.enemy.attack;
+                const total = roll + bonus;
+                let dmg = bonus;
+                let msg = "";
+                if (currentArenaBattle.defending) {
+                    dmg = Math.max(1, Math.floor(dmg / 2));
+                    msg += `<div class="text-blue-400">Sua defesa reduziu o dano!</div>`;
+                    currentArenaBattle.defending = false;
+                }
+                if (total >= 10 + Math.floor(gameState.attributes.dexterity / 2)) {
+                    currentArenaBattle.playerHealth -= dmg;
+                    msg += `<div class="text-red-400">${currentArenaBattle.enemy.name} te acerta e causa ${dmg} de dano! (Rolagem ${roll} + Ataque ${bonus})</div>`;
+                } else {
+                    msg += `<div class="text-green-400">${currentArenaBattle.enemy.name} errou o ataque!</div>`;
+                }
+                log.innerHTML += msg;
+                updateArenaBattleStatus();
+                setTimeout(() => {
+                    if (currentArenaBattle.enemy.health <= 0) {
+                        log.innerHTML += `<div class="text-green-300 font-bold">Você venceu o combate!</div>`;
+                        finishArenaBattle(true);
+                        return;
+                    }
+                    if (currentArenaBattle.playerHealth <= 0) {
+                        log.innerHTML += `<div class="text-red-300 font-bold">Você foi derrotado!</div>`;
+                        finishArenaBattle(false);
+                        return;
+                    }
+                    currentArenaBattle.turn = "player";
+                    addArenaBattleActions();
+                }, 800);
+            }, 1000);
+        }
+
+        function finishArenaBattle(playerWon) {
+            const enemyKey = currentArenaBattle.enemyKey;
+            const enemy = currentArenaBattle.enemy;
+            if (playerWon) {
+                gameState.defeatedEnemies.push(enemyKey);
+                gameState.coins += 2;
+                if (enemyKey === "Ragnar") {
+                    gameState.attributes.strength += 1;
+                    addToStory("Você derrota Ragnar, o Bárbaro, em um combate emocionante! Ganha 2 moedas e sua Força aumenta!");
+                } else if (enemyKey === "Eldrin") {
+                    gameState.attributes.stamina += 1;
+                    addToStory("Você derrota Eldrin, o Mago, em um combate emocionante! Ganha 2 moedas e seu Vigor aumenta!");
+                } else if (enemyKey === "Sylas") {
+                    gameState.attributes.dexterity += 1;
+                    addToStory("Você derrota Sylas, o Arqueiro, em um combate emocionante! Ganha 2 moedas e sua Destreza aumenta!");
+                }
+                // Recupera um pouco de vida
+                gameState.currentHealth = Math.max(1, currentArenaBattle.playerHealth);
+                updateCharacterInfo();
+            } else {
+                takeDamage(currentArenaBattle.playerMaxHealth); // derrota total
+                addToStory(`Você foi derrotado por ${enemy.name} na arena!`);
+            }
+            currentArenaBattle = null;
+            setTimeout(() => showScene('arena'), 1800);
+        }
+
+        // Game Functions
+        function rollDice() {
+            return Math.floor(Math.random() * 20) + 1;
+        }
+
+        function updateCharacterInfo() {
+            const charInfo = document.getElementById('character-info');
+            charInfo.innerHTML = `
+                ${gameState.name} - ${gameState.class}
+                <span class="text-sm block md:inline md:ml-4">
+                    F:${gameState.attributes.strength} D:${gameState.attributes.dexterity} 
+                    V:${gameState.attributes.stamina} C:${gameState.attributes.charm}
+                </span>
+            `;
+            
+            document.getElementById('coins').textContent = gameState.coins;
+            document.getElementById('health').textContent = `${gameState.currentHealth}/${gameState.maxHealth}`;
+            
+            // Update inventory display
+            const inventoryEl = document.getElementById('inventory');
+            inventoryEl.innerHTML = '';
+            
+            if (gameState.inventory.length > 0) {
+                document.getElementById('inventory-container').classList.remove('hidden');
+                gameState.inventory.forEach(item => {
+                    const itemEl = document.createElement('div');
+                    itemEl.className = 'px-3 py-1 bg-gray-700 rounded-full text-sm';
+                    itemEl.textContent = item;
+                    inventoryEl.appendChild(itemEl);
+                });
+            } else {
+                document.getElementById('inventory-container').classList.add('hidden');
+            }
+        }
+
+        function showScene(sceneKey) {
+            gameState.currentScene = sceneKey;
+            const scene = scenes[sceneKey];
+            const storyTextEl = document.getElementById('story-text');
+            const actionButtonsEl = document.getElementById('action-buttons');
+            
+            // Clear previous content
+            storyTextEl.innerHTML = '';
+            actionButtonsEl.innerHTML = '';
+            document.getElementById('dice-container').classList.add('hidden');
+            document.getElementById('location-ui').classList.add('hidden');
+            document.getElementById('dragon-gif').classList.add('hidden');
+            document.getElementById('queen-battle-input').classList.add('hidden');
+            
+            // Arena battle override
+            if (sceneKey === 'arena' && currentArenaBattle) {
+                showArenaBattle(currentArenaBattle.enemyKey);
+                return;
+            }
+
+            // Add story text
+            storyTextEl.innerHTML = `<p class="mb-4">${scene.text}</p>`;
+            
+            // Show dragon GIF if in dragon battle
+            if (sceneKey === 'dragonBattle') {
+                document.getElementById('dragon-gif').classList.remove('hidden');
+            }
+            
+            // Add options
+            scene.options.forEach(option => {
+                // Check if option should be hidden
+                let shouldHide = false;
+                
+                if (option.hideIfPurchased && gameState.purchasedItems.includes(option.hideIfPurchased)) {
+                    shouldHide = true;
+                }
+                
+                if (option.hideIfDefeated && gameState.defeatedEnemies.includes(option.hideIfDefeated)) {
+                    shouldHide = true;
+                }
+                
+                if (!shouldHide) {
+                    const button = document.createElement('button');
+                    button.className = 'px-4 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg font-medium transition-all transform hover:scale-105 flex items-center justify-between';
+                    button.innerHTML = option.text;
+                    
+                    // Check for requirements
+                    let disabled = false;
+                    let disabledReason = '';
+                    
+                    if (option.cost && option.cost > gameState.coins) {
+                        disabled = true;
+                        disabledReason = ` (Falta ${option.cost - gameState.coins} moeda(s))`;
+                    }
+                    
+                    if (option.itemRequired && !gameState.inventory.includes(option.itemRequired)) {
+                        disabled = true;
+                        disabledReason = ` (Requer ${option.itemRequired})`;
+                    }
+                    
+                    if (option.attrCheck && gameState.attributes[option.attrCheck.attr] < option.attrCheck.min) {
+                        disabled = true;
+                        disabledReason = ` (Requer ${option.attrCheck.attr} ≥ ${option.attrCheck.min})`;
+                    }
+                    
+                    if (option.enemy && gameState.defeatedEnemies.includes(option.enemy)) {
+                        disabled = true;
+                        disabledReason = ` (Já derrotado)`;
+                    }
+                    
+                    if (disabled) {
+                        button.className = 'px-4 py-3 bg-gray-900 text-gray-500 rounded-lg font-medium cursor-not-allowed flex items-center justify-between';
+                        button.innerHTML += `<span class="text-red-400 ml-2">${disabledReason}</span>`;
+                        button.disabled = true;
+                    } else {
+                        if (sceneKey === 'arena' && option.action === 'startArenaBattle') {
+                            // Arena battle start
+                            button.addEventListener('click', () => {
+                                showArenaBattle(option.enemy);
+                            });
+                        } else {
+                            button.addEventListener('click', () => handleAction(option.action, option.attr, option.difficulty));
+                        }
+                    }
+                    
+                    actionButtonsEl.appendChild(button);
+                }
+            });
+            
+            updateCharacterInfo();
+        }
+
+        function showDiceRoll(attr, difficulty) {
+            const diceResultEl = document.getElementById('dice-result');
+            const diceBonusEl = document.getElementById('dice-bonus');
+            const diceTotalEl = document.getElementById('dice-total');
+            const diceContainer = document.getElementById('dice-container');
+            
+            diceResultEl.textContent = '?';
+            diceBonusEl.textContent = '';
+            diceTotalEl.textContent = '';
+            diceContainer.classList.remove('hidden');
+            
+            // Animate dice roll
+            diceResultEl.classList.add('dice-roll');
+            setTimeout(() => {
+                diceResultEl.classList.remove('dice-roll');
+                const roll = rollDice();
+                const bonus = gameState.attributes[attr] || 0;
+                const total = roll + bonus;
+                
+                diceResultEl.textContent = roll;
+                diceBonusEl.textContent = `+ ${bonus} (${attr})`;
+                diceTotalEl.textContent = `Total: ${total}`;
+                
+                // Color based on success
+                if (total >= difficulty) {
+                    diceResultEl.className = 'text-4xl font-bold mx-4 text-green-500';
+                    diceTotalEl.className = 'text-xl font-semibold text-green-400';
+                } else {
+                    diceResultEl.className = 'text-4xl font-bold mx-4 text-red-500';
+                    diceTotalEl.textContent = `Total: ${total} (Falhou)`;
+                    diceTotalEl.className = 'text-xl font-semibold text-red-400';
+                }
+            }, 500);
+            
+            // We return a promise to handle the async nature
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    const roll = rollDice();
+                    const bonus = gameState.attributes[attr] || 0;
+                    const total = roll + bonus;
+                    resolve(total >= difficulty);
+                }, 1500);
+            });
+        }
+
+        async function handleAction(action, attr, difficulty) {
+            let success = true;
+            
+            if (attr && difficulty) {
+                success = await showDiceRoll(attr, difficulty);
+            }
+            
+            // Process the action
+            switch (action) {
+                // Season 1 actions
+                case 'attackGoblins':
+                    if (success) {
+                        addToStory("Você avança com coragem, sua arma cortando o ar. Os goblins, surpresos com sua ferocidade, recuam. Alguns caem sob seus golpes, e logo o resto foge para a floresta. Seus companheiros te cumprimentam pelo bom trabalho.");
+                        gameState.attributes.strength += 1;
+                        showScene('mysteriousBush');
+                    } else {
+                        addToStory("Você tenta atacar, mas os goblins são rápidos e numerosos. Eles se esquivam de seus golpes e contra-atacam. Você leva vários ferimentos antes que seus companheiros possam te salvar.");
+                        takeDamage(4);
+                        showScene('mysteriousBush');
+                    }
+                    break;
+                    
+                case 'charmGoblins':
+                    if (success) {
+                        addToStory("Você começa a cantar uma música alegre e faz alguns gestos graciosos. Para sua surpresa, os goblins param de atacar e começam a bater palmas e rir. Eles se juntam a você, dançando e cantando, antes de desaparecer na floresta como se tivessem esquecido por que estavam lutando.");
+                        gameState.attributes.charm += 1;
+                        showScene('mysteriousBush');
+                    } else {
+                        addToStory("Você tenta encantar os goblins com uma performance, mas eles apenas olham confusos por um momento antes de começar a rir de você. Irritados pela tentativa, eles atacam com ainda mais ferocidade.");
+                        takeDamage(3);
+                        showScene('mysteriousBush');
+                    }
+                    break;
+                    
+                case 'fleeGoblins':
+                    if (success) {
+                        addToStory("Você vira e corre o mais rápido que pode, deixando seus companheiros para trás para lidar com os goblins. Depois de alguns minutos de corrida, você para, sem fôlego, mas seguro. Mais tarde, você encontra seus companheiros novamente - eles parecem desapontados com sua covardia.");
+                        gameState.attributes.stamina += 1;
+                        showScene('mysteriousBush');
+                    } else {
+                        addToStory("Você tenta fugir, mas tropeça em uma raiz e cai no chão. Os goblins pulam em cima de você, golpeando com suas armas enferrujadas. A última coisa que você ouve são os gritos de seus companheiros tentando te salvar...");
+                        gameOver("Você foi morto pelos goblins enquanto tentava fugir. Talvez enfrentá-los teria sido uma escolha melhor?");
+                    }
+                    break;
+                    
+                case 'hideFromGoblins':
+                    if (success) {
+                        addToStory("Você rapidamente encontra um bom esconderijo entre as raízes de uma grande árvore. Os goblins passam por você sem notar, focando em seus companheiros. Quando o perigo passa, você sai do esconderijo - seus companheiros sobreviveram, mas alguns parecem feridos.");
+                        gameState.attributes.dexterity += 1;
+                        showScene('mysteriousBush');
+                    } else {
+                        addToStory("Você tenta se esconder, mas acaba fazendo barulho ao se mover. Os goblins imediatamente notam e cercam seu esconderijo. Eles te arrastam para fuera e começam a atacar com selvageria.");
+                        takeDamage(5);
+                        gameOver("Os goblins te encontraram e mostraram pouca misericórdia. Talvez ficar e lutar teria sido mais honroso?");
+                    }
+                    break;
+                    
+                case 'throwRockAtBush':
+                    addToStory("Você pega uma pedra e a joga no arbusto. Um grito agudo ecoa, e um gato selvagem assustado sai correndo. Parece que era apenas um animal. Você segue seu caminho, sentindo-se um pouco bobo.");
+                    showScene('townArrival');
+                    break;
+                    
+                case 'charmBush':
+                    if (success) {
+                        addToStory("Você começa a fazer gestos graciosos e a sussurrar palavras doces para o arbusto. Para sua surpresa, uma figura esguia emerge - é uma elfa! Ela parece impressionada com sua tentativa de encantar um arbusto.");
+                        showScene('elfEncounter');
+                    } else {
+                        addToStory("Você tenta encantar o arbusto com gestos e palavras doces. Nada acontece por um longo momento, até que um esquilo irritado salta do arbusto e foge. Você segue em frente, sentindo-se um pouco envergonhado.");
+                        showScene('townArrival');
+                    }
+                    break;
+                    
+                case 'ignoreBush':
+                    if (success) {
+                        addToStory("Você decide ignorar o arbusto e continua andando. Depois de alguns passos, você ouve um pequeno ruído, mas quando olha para trás, não vê nada. Você chega à cidade sem mais incidentes.");
+                        gameState.attributes.stamina += 1;
+                        showScene('townArrival');
+                    } else {
+                        addToStory("Você tenta ignorar o arbusto, mas algo dentro dele continua chamando sua atenção. Você para e fica olhando fixamente por tanto tempo que acaba perdendo a noção do tempo. Quando finalmente continua, está quase escurecendo.");
+                        showScene('townArrival');
+                    }
+                    break;
+                    
+                case 'attackBush':
+                    addToStory("Você saca sua arma e ataca o arbusto com tudo que tem. Infelizmente, o arbusto esconde uma colmeia de abelhas furiosas. Elas saem em um enxame zumbindo e começam a picar você sem misericórdia.");
+                    takeDamage(6);
+                    gameOver("As abelhas venenosas te atacaram sem piedade. Talvez atacar cegamente não seja sempre a melhor solução?");
+                    break;
+                    
+                case 'attackElf':
+                    if (success) {
+                        addToStory("Você ataca a elfa sem hesitar. Ela parece chocada com sua agressão, mas rapidamente se recupera e contra-ataca com habilidades que superam em muito as suas. Em segundos, você está no chão, sangrando.");
+                        takeDamage(8);
+                        gameOver("A elfa te derrotou facilmente. Talvez uma abordagem mais pacífica teria sido melhor?");
+                    } else {
+                        addToStory("Você tenta atacar a elfa, mas ela é incrivelmente rápida. Antes que você possa completar seu movimento, ela já desviou e contra-atacou. Seu golpe é preciso e mortal.");
+                        gameOver("A elfa te matou em legítima defesa. Elas não são conhecidas por perdoar agressões gratuitas.");
+                    }
+                    break;
+                    
+                case 'charmElf':
+                    if (success) {
+                        addToStory("Você sorri e começa a recitar um poema elfico que conhece. A elfa parece surpresa e depois divertida. 'Você tem coragem, humano', ela diz. 'E algum talento.' Ela sussurra algo em seu ouvido - parece ser um número: '3120' - antes de desaparecer na floresta.");
+                        gameState.attributes.charm += 2;
+                        gameState.hasElfPassword = true;
+                        showScene('townArrival');
+                    } else {
+                        addToStory("Você tenta encantar a elfa com um poema, mas comete um erro crucial em uma palavra élfica importante. Ela fica ofendida e desaparece na floresta com um olhar de desdém.");
+                        showScene('townArrival');
+                    }
+                    break;
+                    
+                case 'talkToElf':
+                    if (success) {
+                        addToStory("Você conversa calmamente com a elfa, explicando que estava apenas sendo cauteloso. Ela parece aceitar sua explicação. 'A floresta é perigosa para os despreparados', ela diz. 'Tome cuidado.' Ela então sussurra algo em seu ouvido - parece ser um número: '3120' - antes de desaparecer entre as árvores.");
+                        gameState.attributes.charm += 1;
+                        gameState.hasElfPassword = true;
+                        showScene('townArrival');
+                    } else {
+                        addToStory("Você tenta conversar com a elfa, mas parece dizer algo errado. Ela olha para você com desconfiança e desaparece na floresta sem dizer uma palavra.");
+                        showScene('townArrival');
+                    }
+                    break;
+                    
+                case 'flirtWithElf':
+                    if (success) {
+                        addToStory("Você dá um passo ousado e beija a mão da elfa, olhando profundamente em seus olhos. Para sua surpresa, ela cora levemente e sorri. 'Você é interessante, humano', ela diz. 'Talvez nos encontremos novamente.' Ela sussurra algo em seu ouvido - parece ser um número: '3120' - antes de desaparecer na floresta.");
+                        gameState.attributes.charm += 3;
+                        gameState.hasElfPassword = true;
+                        showScene('townArrival');
+                    } else {
+                        addToStory("Você tenta um gesto romântico, mas a elfa parece chocada e ofendida. 'Como você ousa!', ela exclama antes de desaparecer na floresta. Você fica ali, sentindo-se um pouco envergonhado.");
+                        showScene('townArrival');
+                    }
+                    break;
+                    
+                case 'goToMarket':
+                    showScene('market');
+                    break;
+                    
+                case 'goToBlacksmith':
+                    showScene('blacksmith');
+                    break;
+                    
+                case 'goToArtisan':
+                    showScene('artisan');
+                    break;
+                    
+                case 'goToArena':
+                    showScene('arena');
+                    break;
+                    
+                case 'goToTavern':
+                    showScene('tavern');
+                    break;
+                    
+                case 'hireInterpreter':
+                    if (gameState.coins >= 1) {
+                        gameState.coins -= 1;
+                        gameState.purchasedItems.push("intérprete");
+                        const merchantLine = gameState.merchantLines[Math.floor(Math.random() * gameState.merchantLines.length)];
+                        addToStory(`Você paga 1 moeda para o intérprete. Ele explica que o mercador está vendendo uma 'maçã encantada' por 1 moeda e um 'amuleto da sorte' por 3 moedas. O mercador também parece oferecer uma poção gratuita para quem parece forte o suficiente.\n\nO mercador olha para você e diz: "${merchantLine}"`);
+                        updateCharacterInfo();
+                        showScene('market');
+                    }
+                    break;
+                    
+                case 'buyApple':
+                    if (gameState.coins >= 1) {
+                        gameState.coins -= 1;
+                        gameState.inventory.push('Maçã');
+                        gameState.purchasedItems.push('Maçã');
+                        const merchantLine = gameState.merchantLines[Math.floor(Math.random() * gameState.merchantLines.length)];
+                        addToStory(`Você compra uma maçã encantada por 1 moeda. O mercador sorri e diz: "${merchantLine} Essa maçã pode ser útil em situações mágicas."`);
+                        updateCharacterInfo();
+                        showScene('market');
+                    }
+                    break;
+                    
+                case 'askForPotion':
+                    if (gameState.attributes.stamina >= 5) {
+                        gameState.attributes.stamina += 1;
+                        gameState.purchasedItems.push("poção");
+                        const merchantLine = gameState.merchantLines[Math.floor(Math.random() * gameState.merchantLines.length)];
+                        addToStory(`O mercador olha para você e parece impressionado com sua constituição física. "${merchantLine} Para alguém tão forte, eu tenho um presente", ele diz, entregando-lhe uma poção que aumenta seu Vigor.`);
+                        updateCharacterInfo();
+                        showScene('market');
+                    }
+                    break;
+                    
+                case 'leaveMarket':
+                    showScene('townArrival');
+                    break;
+                    
+                case 'tradeForShield':
+                    if (gameState.inventory.includes('Guitarra')) {
+                        gameState.inventory = gameState.inventory.filter(item => item !== 'Guitarra');
+                        gameState.inventory.push('Escudo');
+                        gameState.purchasedItems.push('Escudo');
+                        gameState.attributes.strength += 2;
+                        addToStory("Você troca sua Guitarra por um Escudo resistente. O ferreiro explica que este escudo pertenceu a um grande guerreiro. Você sente sua Força aumentar ao segurá-lo.");
+                        updateCharacterInfo();
+                        showScene('blacksmith');
+                    }
+                    break;
+                    
+                case 'buyQuickpack':
+                    if (gameState.coins >= 1) {
+                        gameState.coins -= 1;
+                        gameState.inventory.push('Quickpack');
+                        gameState.purchasedItems.push('Quickpack');
+                        addToStory("Você compra um Quickpack por 1 moeda. Esta bolsa especial permite que você carregue mais itens sem se cansar.");
+                        updateCharacterInfo();
+                        showScene('blacksmith');
+                    }
+                    break;
+                    
+                case 'leaveBlacksmith':
+                    showScene('townArrival');
+                    break;
+                    
+                case 'buyVase':
+                    if (gameState.coins >= 1) {
+                        gameState.coins -= 1;
+                        gameState.inventory.push('Vaso de Cerâmica');
+                        gameState.purchasedItems.push('Vaso de Cerâmica');
+                        addToStory("Você compra um belo vaso de cerâmica por 1 moeda. A filha do artesão parece satisfeita com a venda.");
+                        updateCharacterInfo();
+                        showScene('artisan');
+                    }
+                    break;
+                    
+                case 'charmArtisan':
+                    if (success) {
+                        gameState.attributes.charm += 1;
+                        gameState.inventory.push('Vaso de Cerâmica');
+                        gameState.purchasedItems.push('Vaso de Cerâmica');
+                        addToStory("Você usa seu charme na filha do artesão, fazendo-a rir e corar. 'Para alguém tão encantador, eu não posso cobrar', ela diz, entregando-lhe um vaso de presente.");
+                        updateCharacterInfo();
+                        showScene('artisan');
+                    } else {
+                        if (gameState.coins >= 2) {
+                            gameState.coins -= 2;
+                            gameState.inventory.push('Vaso de Cerâmica');
+                            gameState.purchasedItems.push('Vaso de Cerâmica');
+                            addToStory("Sua tentativa de charme não funciona muito bem. A jovem fica irritada e diz: 'Agora vai custar o dobro para compensar seu atrevimento!' Você paga 2 moedas pelo vaso para evitar mais problemas.");
+                            updateCharacterInfo();
+                            showScene('artisan');
+                        } else {
+                            addToStory("Sua tentativa de charme não funciona e a jovem fica irritada. Como você não tem moedas suficientes para pagar o dobro, ela te expulsa da loja sem o vaso.");
+                            showScene('artisan');
+                        }
+                    }
+                    break;
+                    
+                case 'leaveArtisan':
+                    showScene('townArrival');
+                    break;
+                    
+                case 'fightBarbarian':
+                case 'fightMage':
+                case 'fightArcher':
+                    const enemy = scenes[gameState.currentScene].options.find(opt => opt.action === action).enemy;
+                    if (success) {
+                        gameState.coins += 2;
+                        gameState.defeatedEnemies.push(enemy);
+                        
+                        let attrBonus = '';
+                        if (action === 'fightBarbarian') {
+                            gameState.attributes.strength += 1;
+                            attrBonus = "Sua Força aumenta!";
+                        } else if (action === 'fightMage') {
+                            gameState.attributes.stamina += 1;
+                            attrBonus = "Seu Vigor aumenta!";
+                        } else {
+                            gameState.attributes.dexterity += 1;
+                            attrBonus = "Sua Destreza aumenta!";
+                        }
+                        
+                        addToStory(`Você derrota ${enemy} em um combate emocionante! Ganha 2 moedas pela vitória. ${attrBonus}`);
+                        updateCharacterInfo();
+                        showScene('arena');
+                    } else {
+                        takeDamage(3);
+                        addToStory(`${enemy} prova ser um oponente muito habilidoso. Você é derrotado e leva alguns ferimentos antes que o mestre da arena intervenha.`);
+                        showScene('arena');
+                    }
+                    break;
+                    
+                case 'leaveArena':
+                    showScene('townArrival');
+                    break;
+                    
+                case 'attackThugs':
+                    if (success) {
+                        gameState.coins += 3;
+                        gameState.attributes.strength += 1;
+                        gameState.attributes.stamina += 1;
+                        addToStory("Você avança com seu escudo, surpreendendo os canalhas. Eles tentam resistir, mas sua força e resistência são muito maiores. Em poucos minutos, você os derrota e encontra algumas moedas em seus bolsos. Sua Força e Vigor aumentam com essa vitória!");
+                        updateCharacterInfo();
+                        completeSeason();
+                    } else {
+                        takeDamage(5);
+                        addToStory("Você tenta enfrentar os canalhas, mas eles são mais numerosos e experientes do que pareciam. Eles te cercam e te espancam antes de jogarem você para fora da taberna.");
+                        completeSeason();
+                    }
+                    break;
+                    
+                case 'playMusic':
+                    if (success) {
+                        gameState.attributes.charm += 3;
+                        gameState.knowsDragonWeakness = true;
+                        addToStory("Você começa a tocar sua guitarra com paixão. Para sua surpresa, os canalhas param de brigar e começam a ouvir. Alguns até batem palmas no final! 'Isso foi incrível!', diz um deles. 'Ei, você parece legal... quer saber um segredo? O dragão que ataca essas terras tem um ponto fraco: seu pescoço!' Seu Charme aumenta significativamente com essa performance.");
+                        updateCharacterInfo();
+                        completeSeason();
+                    } else {
+                        addToStory("Você tenta tocar uma música, mas parece que escolheu a música errada. Os canalhas começam a jogar coisas em você e te expulsam da taberna.");
+                        completeSeason();
+                    }
+                    break;
+                    
+                case 'buyMead':
+                    if (gameState.coins >= 1) {
+                        gameState.coins -= 1;
+                        gameState.attributes.charm += 1;
+                        addToStory("Você compra um hidromel e bebe calmamente, ignorando os olhares hostis. A bebida te deixa mais relaxado e confiante. Seu Charme aumenta um pouco.");
+                        updateCharacterInfo();
+                    } else {
+                        addToStory("Você não tem moedas suficientes para comprar um hidromel. Os canalhas riem de você enquanto você deixa a taberna.");
+                    }
+                    completeSeason();
+                    break;
+                    
+                case 'leaveTavern':
+                    addToStory("Você decide que é melhor não se meter com os canalhas e deixa a taberna. A noite está calma enquanto você reflete sobre suas aventuras.");
+                    completeSeason();
+                    break;
+                    
+                // Season 2 actions
+                case 'goToFortress':
+                    showScene('fortressApproach');
+                    break;
+                    
+                case 'enterSewers':
+                    showScene('sewerEncounter');
+                    break;
+                    
+                case 'crossBridge':
+                    showScene('bridgeEncounter');
+                    break;
+                    
+                case 'fightGorgon':
+                    if (success) {
+                        gameState.attributes.strength += 1;
+                        gameState.attributes.stamina += 1;
+                        addToStory("Você luta bravamente contra a Górgona, evitando seu olhar petrificante. Com um golpe final, você a derrota! Ela se dissolve em névoa com um grito agonizante. Sua Força e Vigor aumentam com essa vitória épica!");
+                        updateCharacterInfo();
+                        showScene('fortressInside');
+                    } else {
+                        takeDamage(6);
+                        addToStory("A Górgona prova ser um oponente muito poderoso. Você tenta lutar, mas acaba sendo petrificado parcialmente. Com um esforço sobre-humano, você consegue fugir de volta para a entrada dos esgotos.");
+                        showScene('sewerEncounter');
+                    }
+                    break;
+                    
+                case 'trickGorgon':
+                    if (success) {
+                        gameState.attributes.charm += 2;
+                        addToStory("Você inventa uma história convincente sobre ser um mensageiro da Rainha Branca. A Górgona hesita e acaba te deixando passar. 'Não me engane novamente', ela sussurra enquanto você passa. Seu Charme aumenta significativamente com esse blefe!");
+                        updateCharacterInfo();
+                        showScene('fortressInside');
+                    } else {
+                        addToStory("Você tenta enganar a Górgona, mas ela vê através do seu plano. 'Mentiroso!', ela grita, e antes que você possa reagir, seu corpo começa a se transformar em pedra...");
+                        gameOver("Você foi petrificado pela Górgona. Talvez a abordagem direta fosse melhor?");
+                    }
+                    break;
+                    
+                case 'fleeGorgon':
+                    if (success) {
+                        addToStory("Você recua rapidamente, voltando pelo caminho que veio. A Górgona não te segue, contente em guardar seu território. Você escapa ileso, mas ainda precisa encontrar outra maneira de entrar na fortaleza.");
+                        showScene('fortressApproach');
+                    } else {
+                        takeDamage(4);
+                        addToStory("Você tenta fugir, mas a Górgona é mais rápida. Ela te alcança e te ataca antes que você possa escapar completamente.");
+                        showScene('sewerEncounter');
+                    }
+                    break;
+                    
+                case 'fightGuards':
+                    if (success) {
+                        gameState.attributes.strength += 1;
+                        gameState.attributes.dexterity += 1;
+                        gameState.attributes.stamina += 1;
+                        gameState.attributes.charm += 1;
+                        addToStory("Você enfrenta os guardas em um combate intenso. Seu escudo prova ser inestimável, bloqueando seus ataques enquanto você contra-ataca. Finalmente, você os derrota! Todos os seus atributos aumentam um pouco com essa vitória difícil.");
+                        updateCharacterInfo();
+                        showScene('fortressInside');
+                    } else {
+                        takeDamage(5);
+                        addToStory("Os guardas são lutadores treinados e trabalham bem em equipe. Eles te cercam e te atacam sem piedade. Você é forçado a recuar, gravemente ferido.");
+                        showScene('bridgeEncounter');
+                    }
+                    break;
+                    
+                case 'convinceGuards':
+                    if (success) {
+                        gameState.attributes.charm += 2;
+                        addToStory("Você usa toda sua persuasão para convencer os guardas de que tem permissão para entrar. Para sua surpresa, eles hesitam e acabam te deixando passar. 'Não faça nada que nos arrependamos', diz um deles. Seu Charme aumenta significativamente com essa atuação!");
+                        updateCharacterInfo();
+                        showScene('fortressInside');
+                    } else {
+                        addToStory("Você tenta convencer os guardas, mas eles não acreditam em sua história. 'Tente outra coisa, impostor!', dizem eles, preparando-se para atacar.");
+                        showScene('bridgeEncounter');
+                    }
+                    break;
+                    
+                case 'retreatFromBridge':
+                    if (success) {
+                        addToStory("Você recua habilmente antes que os guardas possam te cercar. Eles não te perseguem, contentes em manter sua posição. Você escapa ileso, mas ainda precisa encontrar outra maneira de entrar na fortaleza.");
+                        showScene('fortressApproach');
+                    } else {
+                        takeDamage(3);
+                        addToStory("Você tenta recuar, mas os guardas são rápidos. Eles te atacam enquanto você recua, causando alguns ferimentos.");
+                        showScene('bridgeEncounter');
+                    }
+                    break;
+                    
+                case 'tryDoor':
+                    if (gameState.hasElfPassword) {
+                        addToStory("Você se lembra do número que a elfa te sussurrou - 3120 - e o digita no mecanismo. Com um clique satisfatório, a porta se abre!");
+                        showScene('secretRoom');
+                    } else {
+                        addToStory("Você tenta abrir a porta, mas ela está trancada com um mecanismo de combinação. Você não sabe o código e não consegue abri-la.");
+                        showScene('fortressInside');
+                    }
+                    break;
+                    
+                case 'searchAlternative':
+                    if (success) {
+                        addToStory("Você procura cuidadosamente por outra entrada e encontra uma pequena passagem de serviço escondida atrás de uma tapeçaria. É um aperto, mas você consegue passar!");
+                        showScene('secretRoom');
+                    } else {
+                        takeDamage(2);
+                        addToStory("Você procura por outra entrada, mas aciona uma armadilha! Dardos envenenados são disparados das paredes, e você mal consegue desviar.");
+                        showScene('fortressInside');
+                    }
+                    break;
+                    
+                case 'takeWand':
+                    gameState.inventory.push('Varinha Mágica');
+                    addToStory("Você pega a varinha mágica. Ela brilha intensamente em sua mão por um momento antes de se acalmar. Você sente um poder antigo fluindo através dela.");
+                    updateCharacterInfo();
+                    showScene('dragonBattle');
+                    break;
+                    
+                case 'enchantApple':
+                    if (gameState.inventory.includes('Maçã')) {
+                        gameState.inventory = gameState.inventory.filter(item => item !== 'Maçã');
+                        gameState.maxHealth *= 2;
+                        gameState.currentHealth = gameState.maxHealth;
+                        addToStory("Você usa a varinha para encantar a maçã, que brilha com uma luz dourada antes de desaparecer em sua mão. Você sente uma energia vital percorrer seu corpo - sua saúde máxima dobrou!");
+                        updateCharacterInfo();
+                        showScene('dragonBattle');
+                    }
+                    break;
+                    
+                case 'leaveSecretRoom':
+                    showScene('fortressInside');
+                    break;
+
+                case 'fightDragon':
+                    // 1% chance to win regardless of stats
+                    const dragonWin = Math.random() < 0.01;
+                    if (dragonWin) {
+                        addToStory("Em um golpe incrivelmente sortudo, você acerta exatamente no ponto fraco do dragão que você descobriu na taberna - seu pescoço! Seraphina solta um rugido de dor antes de desabar no chão, derrotada. Você mal pode acreditar em sua própria sorte!");
+                        showScene('queenBattle');
+                    } else {
+                        addToStory("Você avança corajosamente contra o dragão, mas Seraphina é muito mais poderosa do que você imaginava. Seus ataques não fazem nem cócegas nela, e com um único golpe de sua pata, você é arremessado contra a parede.");
+                        gameOver("O dragão te derrotou facilmente. Talvez você precisasse de mais preparo para enfrentar uma criatura tão poderosa?");
+                    }
+                    break;
+
+                case 'fleeDragon':
+                    if (success) {
+                        addToStory("Você recua rapidamente, fugindo do dragão. Seraphina não te persegue, contente em manter seu território. Você escapa ileso, mas ainda precisa enfrentá-la para resgatar a princesa.");
+                        showScene('fortressApproach');
+                    } else {
+                        addToStory("Você tenta fugir do dragão, mas Seraphina é muito rápida. Ela te alcança e te ataca com suas garras afiadas.");
+                        gameOver("O dragão te derrotou enquanto tentava fugir. Talvez enfrentá-lo com coragem teria sido melhor?");
+                    }
+                    break;
+
+                case 'fightQueen':
+                    if (!gameState.inventory.includes('Varinha Mágica')) {
+                        addToStory("Você avança contra a Rainha Branca, mas antes que possa chegar perto, ela levanta a mão e você sente seu corpo congelar. 'Patético', ela diz, antes de lançar um feitiço que te transforma em estátua de gelo.");
+                        gameOver("A Rainha Branca te derrotou facilmente. Talvez você precisasse de algo mais para enfrentá-la?");
+                    } else {
+                        addToStory("Você levanta sua varinha mágica, sentindo seu poder pulsar. A Rainha Branca parece surpresa. 'Uma varinha antiga? Interessante... mas você sabe como usá-la?', ela desafia, enquanto uma esmeralda brilhante em sua coroa começa a pulsar com energia maligna.");
+                        
+                        // Show input for targeting the queen
+                        document.getElementById('queen-battle-text').textContent = 
+                            "Você tem a varinha mágica! A Rainha Branca está diante de você, sua coroa com uma esmeralda brilhante pulsando com energia. Onde você vai direcionar seu ataque?";
+                        document.getElementById('queen-battle-input').classList.remove('hidden');
+                        
+                        // Set up the attack button
+                        document.getElementById('queen-attack-btn').onclick = () => {
+                            const target = document.getElementById('queen-target-input').value.trim().toLowerCase();
+                            if (target === 'coroa' || target === 'esmeralda') {
+                                addToStory("Você concentra toda a energia da varinha e dispara um feitiço diretamente na coroa da Rainha Branca! A esmeralda brilha intensamente antes de explodir em mil pedaços. A rainha grita enquanto a escuridão a abandona, e ela cai de joelhos, transformando-se novamente em uma mulher normal.");
+                                addToStory("A maldição foi quebrada! A rainha, agora livre da escuridão, agradece por tê-la libertado. Ela explica que foi corrompida pela esmeralda maligna há muitos anos. A princesa é libertada e, como recompensa, a rainha oferece sua mão em casamento.");
+                                completeSeason();
+                            } else {
+                                addToStory("Você lança um feitiço poderoso, mas ele não atinge o alvo correto. A Rainha Branca ri de você antes de contra-atacar com um feitiço congelante que te transforma em uma estátua de gelo.");
+                                gameOver("Sua varinha mágica não foi suficiente sem o alvo correto. A Rainha Branca te derrotou.");
+                            }
+                        };
+                    }
+                    break;
+                    
+                default:
+                    console.log("Ação não reconhecida:", action);
+            }
+        }
+
+        function addToStory(text) {
+            const storyTextEl = document.getElementById('story-text');
+            const p = document.createElement('p');
+            p.className = 'mb-4 fade-in';
+            p.textContent = text;
+            storyTextEl.appendChild(p);
+            storyTextEl.scrollTop = storyTextEl.scrollHeight;
+        }
+
+        function takeDamage(amount) {
+            gameState.currentHealth -= amount;
+            if (gameState.currentHealth <= 0) {
+                gameState.currentHealth = 0;
+                gameOver("Você foi derrotado em combate. Suas aventuras chegaram a um fim prematuro.");
+            }
+            updateCharacterInfo();
+            
+            const healthEl = document.getElementById('health');
+            healthEl.classList.remove('text-red-400');
+            healthEl.classList.add('text-red-600', 'pulse');
+            setTimeout(() => {
+                healthEl.classList.remove('pulse');
+                healthEl.classList.add('text-red-400');
+            }, 1000);
+        }
+
+        function gameOver(message) {
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('game-over').classList.remove('hidden');
+            
+            const gameOverText = document.getElementById('game-over-text');
+            gameOverText.innerHTML = `
+                <p class="mb-4">${message}</p>
+                <p>Sua jornada termina aqui...</p>
+                <p class="mt-4">Você alcançou a Temporada ${gameState.season} como ${gameState.name} - ${gameState.class}.</p>
+                <p>Atributos finais: F:${gameState.attributes.strength} D:${gameState.attributes.dexterity} V:${gameState.attributes.stamina} C:${gameState.attributes.charm}</p>
+            `;
+        }
+
+        function completeSeason() {
+            if (gameState.season === 1) {
+                // Prepare for season 2
+                gameState.season = 2;
+                gameState.attributes.strength += 1;
+                gameState.attributes.dexterity += 1;
+                gameState.attributes.stamina += 1;
+                gameState.attributes.charm += 1;
+                
+                // Add ancestral sword
+                gameState.inventory.push('Espada Ancestral');
+                gameState.attributes.strength += 3;
+                gameState.maxHealth += 5;
+                
+                showScene('season2Start');
+            } else if (gameState.season === 2) {
+                document.getElementById('game-screen').classList.add('hidden');
+                document.getElementById('season-complete').classList.remove('hidden');
+                
+                const seasonCompleteText = document.getElementById('season-complete-text');
+                seasonCompleteText.innerHTML = `
+                    <p class="mb-4">Parabéns ${gameState.name}! Você completou a segunda temporada!</p>
+                    <p>Você salvou a princesa e derrotou a Rainha Branca!</p>
+                    <p class="mt-4">Suas façanhas serão lembradas por gerações.</p>
+                `;
+            }
+        }
+
+        // Initialize character creation
+        document.addEventListener('DOMContentLoaded', () => {
+            // Character creation buttons
+            document.querySelectorAll('.class-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                document.querySelectorAll('.class-btn').forEach(btn => {
+                btn.classList.remove('bg-yellow-600', 'bg-blue-600', 'bg-green-600', 'bg-purple-600');
+                });
+                button.classList.remove('bg-gray-800');
+                
+                const playerClass = button.dataset.class;
+                gameState.class = playerClass;
+                
+                switch(playerClass) {
+                case 'Guerreiro':
+                    button.classList.add('bg-yellow-600');
+                    break;
+                case 'Paladino':
+                    button.classList.add('bg-blue-600');
+                    break;
+                case 'Bardo':
+                    button.classList.add('bg-green-600');
+                    break;
+                case 'Mago':
+                    button.classList.add('bg-purple-600');
+                    break;
+                }
+            });
+            });
+            
+            // Attribute controls
+            let totalPoints = 10;
+            let pointsAvailable = totalPoints;
+
+            // Inicialize os atributos mínimos
+            const attributes = ['strength', 'dexterity', 'stamina', 'charm'];
+            const minValues = { strength: 1, dexterity: 1, stamina: 1, charm: 1 };
+
+            // Atualize a função de pontos restantes:
+            function updatePointsRemaining() {
+                document.getElementById('points-remaining').textContent = `Pontos restantes: ${pointsAvailable}`;
+                // Desabilita botões "+" se não houver pontos
+                document.querySelectorAll('.increment-btn').forEach(btn => {
+                    btn.disabled = pointsAvailable <= 0;
+                    btn.classList.toggle('opacity-50', pointsAvailable <= 0);
+                });
+                // Desabilita botões "-" se atributo está no mínimo
+                attributes.forEach(attr => {
+                    const btn = document.querySelector(`.decrement-btn[data-attr="${attr}"]`);
+                    btn.disabled = gameState.attributes[attr] <= minValues[attr];
+                    btn.classList.toggle('opacity-50', gameState.attributes[attr] <= minValues[attr]);
+                });
+            }
+
+            // Incremento
+            document.querySelectorAll('.increment-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    const attr = button.dataset.attr;
+                    if (pointsAvailable > 0) {
+                        gameState.attributes[attr]++;
+                        pointsAvailable--;
+                        document.getElementById(`${attr}-value`).textContent = gameState.attributes[attr];
+                        updatePointsRemaining();
+                    }
+                });
+            });
+
+            // Decremento
+            document.querySelectorAll('.decrement-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    const attr = button.dataset.attr;
+                    if (gameState.attributes[attr] > minValues[attr]) {
+                        gameState.attributes[attr]--;
+                        pointsAvailable++;
+                        document.getElementById(`${attr}-value`).textContent = gameState.attributes[attr];
+                        updatePointsRemaining();
+                    }
+                });
+            });
+
+            // Inicialização dos valores
+            attributes.forEach(attr => {
+                document.getElementById(`${attr}-value`).textContent = gameState.attributes[attr];
+            });
+            updatePointsRemaining();
+            
+            // Start game button
+            document.getElementById('start-game-btn').addEventListener('click', () => {
+            const name = document.getElementById('character-name').value.trim();
+            if (!name) {
+                alert('Por favor, insira um nome para seu personagem.');
+                return;
+            }
+            
+            if (!gameState.class) {
+                alert('Por favor, selecione uma classe.');
+                return;
+            }
+            
+            gameState.name = name;
+
+            // Add class bonuses
+            switch(gameState.class) {
+                case 'Guerreiro':
+                gameState.attributes.strength += 10;
+                break;
+                case 'Paladino':
+                gameState.attributes.strength += 5;
+                gameState.attributes.stamina += 5;
+                break;
+                case 'Bardo':
+                gameState.attributes.charm += 10;
+                break;
+                case 'Mago':
+                gameState.attributes.stamina += 10;
+                break;
+            }
+
+            document.getElementById('character-creation').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            
+            showScene('forestAmbush');
+            });
+            
+            // Restart button
+            document.getElementById('restart-btn').addEventListener('click', () => {
+            location.reload();
+            });
+            
+            // Next season button
+            document.getElementById('next-season-btn').addEventListener('click', () => {
+            location.reload();
+            });
+        });
+    </script>
+</body>
+</html>

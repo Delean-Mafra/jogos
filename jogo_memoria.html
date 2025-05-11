@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Memória - Letras Personalizadas</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .game-board {
+            display: grid;
+            /* Vamos manter 4 colunas, o que acomodará 22 cartas em 6 linhas (5 cheias e 1 com 2) */
+            grid-template-columns: repeat(4, 100px);
+            grid-gap: 10px; /* Espaço entre as cartas */
+            perspective: 800px; /* Para o efeito 3D ao virar */
+        }
+
+        .card {
+            width: 100px;
+            height: 100px;
+            position: relative;
+            transform-style: preserve-3d; /* Mantém o 3D para as faces */
+            transition: transform 0.5s ease-in-out; /* Animação ao virar */
+            cursor: pointer;
+        }
+
+        .card.flip {
+            transform: rotateY(180deg); /* Vira a carta */
+        }
+
+        .card .front-face,
+        .card .back-face {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            backface-visibility: hidden; /* Esconde a face de trás quando não visível */
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 36px;
+            font-weight: bold;
+        }
+
+        .card .front-face {
+            background-color: #4CAF50; /* Cor de fundo da frente da carta */
+            color: white;
+            transform: rotateY(180deg); /* Inicialmente virada para trás */
+        }
+
+        .card .back-face {
+            background-color: #2196F3; /* Cor de fundo do verso da carta */
+            color: white;
+        }
+
+        /* Estilo para cartas que já foram encontradas (pares) */
+        .card.match {
+            /* Pode adicionar um estilo diferente, se quiser */
+            /* Por enquanto, apenas mantém virada */
+            cursor: default; /* Remove o cursor de "h mãozinha" */
+            opacity: 0.8; /* Uma pequena transparência pode indicar que já foi encontrado */
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Jogo da Memória</h1>
+
+    <div class="game-board">
+        </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const gameBoard = document.querySelector('.game-board');
+
+            // --- AQUI ESTÁ A ALTERAÇÃO: NOVOS VALORES PARA AS CARTAS ---
+            const cardValues = ['D', 'E', 'L', 'A', 'N', 'P', 'I', 'C', 'M', 'F', 'R'];
+
+            // Duplicamos os valores para criar os pares
+            const cards = [...cardValues, ...cardValues];
+
+            let flippedCards = []; // Array para armazenar as cartas viradas no turno
+            let lockBoard = false; // Variável para bloquear cliques durante a checagem de par
+            let matchesFound = 0; // Contador de pares encontrados
+
+            // Função para embaralhar o array de cartas (Fisher-Yates Shuffle)
+            function shuffleCards(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]]; // Troca elementos de posição
+                }
+                return array;
+            }
+
+            // Função para criar o elemento HTML de uma carta
+            function createCard(value) {
+                const card = document.createElement('div');
+                card.classList.add('card');
+                card.dataset.value = value; // Armazena o valor na carta para checagem
+
+                const frontFace = document.createElement('div');
+                frontFace.classList.add('front-face');
+                frontFace.textContent = value; // Mostra o valor na frente
+
+                const backFace = document.createElement('div');
+                backFace.classList.add('back-face');
+
+                card.appendChild(frontFace);
+                card.appendChild(backFace);
+
+                // Adiciona o evento de clique na carta
+                card.addEventListener('click', flipCard);
+
+                return card;
+            }
+
+            // Função executada ao clicar em uma carta
+            function flipCard() {
+                // Se o tabuleiro estiver bloqueado ou a carta já estiver virada ou já for um par, ignora o clique
+                if (lockBoard || this.classList.contains('flip') || this.classList.contains('match')) {
+                    return;
+                }
+
+                this.classList.add('flip'); // Adiciona a classe 'flip' para virar a carta
+
+                flippedCards.push(this); // Adiciona a carta virada ao array
+
+                // Se já viramos duas cartas
+                if (flippedCards.length === 2) {
+                    lockBoard = true; // Bloqueia o tabuleiro
+                    checkForMatch(); // Verifica se formam um par
+                }
+            }
+
+            // Função para verificar se as duas cartas viradas formam um par
+            function checkForMatch() {
+                const [cardOne, cardTwo] = flippedCards;
+
+                // Compara os valores das cartas usando o dataset
+                if (cardOne.dataset.value === cardTwo.dataset.value) {
+                    // É um par!
+                    disableCards(); // Desabilita cliques nessas cartas
+                    matchesFound++;
+                    // Verifica se todos os pares foram encontrados
+                    if (matchesFound === cardValues.length) {
+                        // Jogo terminado! Você pode adicionar uma mensagem aqui.
+                        console.log("Parabéns! Você encontrou todos os pares!");
+                         // Adiciona uma mensagem simples na tela
+                        displayMessage("Parabéns! Você encontrou todos os pares!");
+                    }
+                } else {
+                    // Não é um par
+                    unflipCards(); // Vira as cartas de volta
+                }
+            }
+
+             // Função para exibir uma mensagem na tela (opcional)
+            function displayMessage(message) {
+                const messageElement = document.createElement('div');
+                messageElement.textContent = message;
+                messageElement.style.cssText = `
+                    margin-top: 20px;
+                    font-size: 24px;
+                    color: #333;
+                    font-weight: bold;
+                `;
+                document.body.appendChild(messageElement);
+            }
+
+
+            // Função para desabilitar cliques em cartas que formam um par
+            function disableCards() {
+                const [cardOne, cardTwo] = flippedCards;
+                cardOne.removeEventListener('click', flipCard);
+                cardTwo.removeEventListener('click', flipCard);
+
+                // Opcional: Adicionar uma classe para estilizar cartas encontradas
+                cardOne.classList.add('match');
+                cardTwo.classList.add('match');
+
+
+                resetBoard(); // Reseta as variáveis para o próximo turno
+            }
+
+            // Função para virar as cartas de volta quando não formam um par
+            function unflipCards() {
+                const [cardOne, cardTwo] = flippedCards;
+
+                // Espera um pouco antes de virar de volta para o jogador ver as cartas
+                setTimeout(() => {
+                    cardOne.classList.remove('flip');
+                    cardTwo.classList.remove('flip');
+                    resetBoard(); // Reseta as variáveis
+                }, 1000); // Espera 1 segundo (1000 milissegundos)
+            }
+
+            // Função para resetar as variáveis de controle do turno
+            function resetBoard() {
+                [flippedCards, lockBoard] = [[], false]; // Limpa o array e desbloqueia o tabuleiro
+            }
+
+            // Função para iniciar o jogo
+            function startGame() {
+                const shuffledCards = shuffleCards(cards); // Embaralha as cartas
+
+                // Cria e adiciona os elementos HTML das cartas ao tabuleiro
+                shuffledCards.forEach(value => {
+                    const cardElement = createCard(value);
+                    gameBoard.appendChild(cardElement);
+                });
+            }
+
+            // Inicia o jogo quando a página carrega
+            startGame();
+        });
+    </script>
+
+</body>
+</html>

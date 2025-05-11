@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Roleta Russa - Jogador vs Bot</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: linear-gradient(to right, #1f1c2c, #928dab);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .drum {
+      display: grid;
+      grid-template-columns: repeat(3, 80px);
+      grid-template-rows: repeat(2, 80px);
+      gap: 10px;
+      justify-content: center;
+      margin: 20px auto;
+    }
+    .chamber {
+      width: 80px;
+      height: 80px;
+      background-color: #333;
+      border: 3px solid #555;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 18px;
+      transition: all 0.3s ease;
+    }
+    .empty {
+      background-color: #444;
+    }
+    .fired {
+      background-color: #8b0000;
+      animation: flash 0.5s;
+    }
+    .safe {
+      background-color: #006400;
+      animation: flash 0.5s;
+    }
+    .current {
+      border-color: #ffd700;
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+    }
+    @keyframes flash {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+    .modal {
+      background-color: rgba(0, 0, 0, 0.8);
+      transition: all 0.3s ease;
+    }
+  </style>
+</head>
+<body class="text-white min-h-screen flex flex-col items-center justify-center p-6">
+
+  <h1 class="text-4xl font-bold mb-4">🔫 Roleta Russa</h1>
+  <p class="text-xl mb-6 text-center">Você vs Bot – Tente sobreviver!</p>
+
+  <div id="game" class="bg-gray-800 p-6 rounded-lg shadow-lg max-w-md w-full text-center">
+    <div id="message" class="mb-4 text-lg font-semibold h-16 flex items-center justify-center">
+      Clique em "Iniciar Jogo" para começar!
+    </div>
+
+    <div class="drum" id="drum">
+      <!-- Câmaras do tambor serão geradas via JavaScript -->
+    </div>
+
+    <div class="mt-6 flex justify-center space-x-4">
+      <button id="startBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+        Iniciar Jogo
+      </button>
+      <button id="shootBtn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded hidden">
+        Atirar
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal de resultado -->
+  <div id="resultModal" class="fixed inset-0 flex items-center justify-center hidden modal z-50">
+    <div class="bg-gray-900 p-8 rounded-lg shadow-lg max-w-md w-full text-center border-2 border-yellow-500">
+      <h2 id="resultTitle" class="text-3xl font-bold mb-4 text-yellow-500"></h2>
+      <p id="resultMessage" class="text-xl mb-6"></p>
+      <button id="playAgainBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+        Jogar Novamente
+      </button>
+    </div>
+  </div>
+
+  <footer class="mt-10 text-sm text-gray-400">
+    Desenvolvido com HTML, CSS e JavaScript – Roleta Russa Simulada
+  </footer>
+
+  <script>
+    // Elementos da interface
+    const message = document.getElementById('message');
+    const drum = document.getElementById('drum');
+    const startBtn = document.getElementById('startBtn');
+    const shootBtn = document.getElementById('shootBtn');
+    const resultModal = document.getElementById('resultModal');
+    const resultTitle = document.getElementById('resultTitle');
+    const resultMessage = document.getElementById('resultMessage');
+    const playAgainBtn = document.getElementById('playAgainBtn');
+
+    // Variáveis do jogo
+    let chambers = [];
+    let bulletPosition = -1;
+    let currentChamber = 0;
+    let currentPlayer = 'player'; // 'player' ou 'bot'
+    let gameOver = false;
+    let botTimeout = null;
+
+    // Efeitos sonoros (simulados com console.log)
+    function playSound(sound) {
+      console.log(`Playing sound: ${sound}`);
+    }
+
+    // Inicializar o jogo
+    function initGame() {
+      // Limpar qualquer timeout pendente
+      if (botTimeout) {
+        clearTimeout(botTimeout);
+        botTimeout = null;
+      }
+
+      // Configuração inicial
+      chambers = [false, false, false, false, false, false];
+      bulletPosition = Math.floor(Math.random() * 6);
+      currentChamber = 0;
+      currentPlayer = 'player';
+      gameOver = false;
+
+      // Resetar UI
+      drum.innerHTML = '';
+      for (let i = 0; i < 6; i++) {
+        const chamber = document.createElement('div');
+        chamber.className = 'chamber empty';
+        chamber.textContent = i + 1;
+        chamber.id = `chamber-${i}`;
+        drum.appendChild(chamber);
+      }
+
+      // Marcar a primeira câmara como atual
+      updateCurrentChamber();
+
+      // Configurar botões
+      startBtn.classList.add('hidden');
+      shootBtn.classList.remove('hidden');
+      shootBtn.disabled = false;
+
+      // Mensagem inicial
+      message.textContent = 'O tambor foi girado. Sua vez de atirar!';
+    }
+
+    // Atualizar a visualização da câmara atual
+    function updateCurrentChamber() {
+      // Remover a classe 'current' de todas as câmaras
+      document.querySelectorAll('.chamber').forEach(c => {
+        c.classList.remove('current');
+      });
+      
+      // Adicionar a classe 'current' à câmara atual
+      const currentDiv = document.getElementById(`chamber-${currentChamber}`);
+      if (currentDiv) {
+        currentDiv.classList.add('current');
+      }
+    }
+
+    // Jogada do bot automaticamente
+    function botPlay() {
+      if (gameOver) return;
+      
+      message.textContent = 'O bot está pensando...';
+      
+      // Desabilitar botão durante a jogada do bot
+      shootBtn.disabled = true;
+      
+      botTimeout = setTimeout(() => {
+        message.textContent = 'O bot está atirando...';
+        setTimeout(() => {
+          if (!gameOver) shoot();
+        }, 1500);
+      }, 2000);
+    }
+
+    // Atirar
+    function shoot() {
+      if (gameOver) return;
+      
+      // Desabilitar botão durante a ação
+      shootBtn.disabled = true;
+      
+      // Verificar se a bala está na câmara atual
+      const isDead = currentChamber === bulletPosition;
+      
+      // Efeito sonoro
+      if (isDead) {
+        playSound('gunshot');
+        setTimeout(() => playSound('death'), 300);
+      } else {
+        playSound('empty-click');
+      }
+      
+      // Atualizar câmara
+      const currentDiv = document.getElementById(`chamber-${currentChamber}`);
+      currentDiv.classList.remove('empty');
+      currentDiv.classList.add(isDead ? 'fired' : 'safe');
+      
+      setTimeout(() => {
+        // Verificar se o jogo terminou
+        if (isDead) {
+          if (currentPlayer === 'player') {
+            showResult('Game Over', 'Você morreu! O bot venceu.');
+          } else {
+            showResult('Você venceu!', 'O bot morreu! Você sobreviveu.');
+          }
+          gameOver = true;
+        } else {
+          // Avançar para a próxima câmara
+          currentChamber = (currentChamber + 1) % 6;
+          updateCurrentChamber();
+          
+          // Trocar jogador
+          currentPlayer = currentPlayer === 'player' ? 'bot' : 'player';
+          
+          // Atualizar mensagem
+          if (currentPlayer === 'player') {
+            message.textContent = 'Click! Sua vez de atirar!';
+            shootBtn.disabled = false;
+          } else {
+            message.textContent = 'Click! Vez do bot...';
+            // Bot joga automaticamente após um tempo
+            botPlay();
+          }
+        }
+      }, 1000);
+    }
+
+    // Mostrar resultado
+    function showResult(title, msg) {
+      resultTitle.textContent = title;
+      resultMessage.textContent = msg;
+      resultModal.classList.remove('hidden');
+    }
+
+    // Event listeners
+    startBtn.addEventListener('click', initGame);
+    shootBtn.addEventListener('click', shoot);
+    playAgainBtn.addEventListener('click', () => {
+      resultModal.classList.add('hidden');
+      initGame();
+    });
+  </script>
+</body>
+</html>

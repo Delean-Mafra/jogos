@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Forca</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            padding: 20px;
+            background-color: #f0f0f0;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            background-color: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            max-width: 800px;
+            width: 90%;
+            margin: 0 auto;
+        }
+
+        .dica {
+            font-size: 1.4em;
+            margin: 20px 0;
+            color: #3498db;
+            font-weight: bold;
+            background-color: #ecf0f1;
+            padding: 10px 20px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+
+        .palavra {
+            font-size: 2.5em;
+            margin: 30px 0;
+            letter-spacing: 5px;
+            font-family: monospace;
+            color: #2c3e50;
+        }
+
+        .letras {
+            margin: 20px 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .letra {
+            width: 45px;
+            height: 45px;
+            font-size: 1.5em;
+            border: none;
+            border-radius: 8px;
+            background-color: #3498db;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .letra:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .letra-chutada {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .erro {
+            color: #e74c3c;
+            font-size: 1.2em;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+
+        #forcaCanvas {
+            border: 2px solid #2c3e50;
+            border-radius: 10px;
+            margin: 20px auto;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        @keyframes aparecer {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .dica, .palavra, .letras {
+            animation: aparecer 0.5s ease-out;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+
+            .letra {
+                width: 35px;
+                height: 35px;
+                font-size: 1.2em;
+            }
+
+            .palavra {
+                font-size: 2em;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Jogo da Forca</h1>
+        <div id="dica" class="dica"></div>
+        <canvas id="forcaCanvas" width="200" height="250"></canvas>
+        <div id="palavra" class="palavra"></div>
+        <div id="letras" class="letras"></div>
+        <div id="erros" class="erro"></div>
+    </div>
+
+    <script src="forc.js"></script>
+</body>
+</html>

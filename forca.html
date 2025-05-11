@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Forca</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3/brython.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3/brython_stdlib.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            padding: 20px;
+            background-color: #f0f0f0;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            background-color: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            max-width: 800px;
+            width: 90%;
+            margin: 0 auto;
+        }
+
+        .dica {
+            font-size: 1.4em;
+            margin: 20px 0;
+            color: #3498db;
+            font-weight: bold;
+            background-color: #ecf0f1;
+            padding: 10px 20px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+
+        .palavra {
+            font-size: 2.5em;
+            margin: 30px 0;
+            letter-spacing: 5px;
+            font-family: monospace;
+            color: #2c3e50;
+        }
+
+        .letras {
+            margin: 20px 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .letra {
+            width: 45px;
+            height: 45px;
+            font-size: 1.5em;
+            border: none;
+            border-radius: 8px;
+            background-color: #3498db;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .letra:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .letra-chutada {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .erro {
+            color: #e74c3c;
+            font-size: 1.2em;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+
+        #forcaCanvas {
+            border: 2px solid #2c3e50;
+            border-radius: 10px;
+            margin: 20px auto;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        @keyframes aparecer {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .dica, .palavra, .letras {
+            animation: aparecer 0.5s ease-out;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+
+            .letra {
+                width: 35px;
+                height: 35px;
+                font-size: 1.2em;
+            }
+
+            .palavra {
+                font-size: 2em;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body onload="brython()">
+    <div class="container">
+        <h1>Jogo da Forca</h1>
+        <div id="dica" class="dica"></div>
+        <canvas id="forcaCanvas" width="200" height="250"></canvas>
+        <div id="palavra" class="palavra"></div>
+        <div id="letras" class="letras"></div>
+        <div id="erros" class="erro"></div>
+    </div>
+
+    <script type="text/python">
+from browser import document, window, alert, html
+import random
+import math
+
+# Dados do jogo
+jogo_forca = {
+    "Países": [
+        "Brasil", "Argentina", "Canadá", "Estados Unidos", "México", 
+        "França", "Alemanha", "Japão", "Itália", "Reino Unido"
+    ],
+    "Objetos": [
+        "Cadeira", "Mesa", "Computador", "Caderno", "Relógio",
+        "Telefone", "Lâmpada", "Ferro", "Espelho", "Ventilador"
+    ],
+    "Elogios": [
+        "Inteligente", "Criativo", "Amável", "Gentil", "Engraçado",
+        "Educado", "Carismático", "Honesto", "Simpático", "Competente"
+    ],
+    "Animais": [
+        "Cachorro", "Gato", "Cavalo", "Elefante", "Leão",
+        "Tigre", "Águia", "Baleia", "Macaco", "Girafa"
+    ],
+    "Cores": [
+        "Vermelho", "Azul", "Amarelo", "Verde", "Preto",
+        "Branco", "Laranja", "Rosa", "Cinza", "Roxo"
+    ],
+    "Sentimentos": [
+        "Felicidade", "Tristeza", "Raiva", "Medo", "Esperança",
+        "Amor", "Saudade", "Confiança", "Alívio", "Solidão"
+    ],
+    "Alimentos": [
+        "Arroz", "Feijão", "Pão", "Macarrão", "Carne",
+        "Frango", "Peixe", "Batata", "Maçã", "Banana"
+    ],
+    "FLV": [
+        "Alface", "Cenoura", "Tomate", "Pepino", "Abóbora",
+        "Brócolis", "Espinafre", "Abacate", "Berinjela", "Couve"
+    ]
+}
+
+class JogoForca:
+    def __init__(self):
+        self.palavra_aleatoria = ''
+        self.categoria_aleatoria = ''
+        self.letras_chutadas = []
+        self.erros = 0
+        self.palavra_escondida = []
+        self.max_erros = 7
+        self.escolher_palavra()
+        self.desenhar_forca()
+
+    def escolher_palavra(self):
+        self.categoria_aleatoria = random.choice(list(jogo_forca.keys()))
+        palavras = jogo_forca[self.categoria_aleatoria]
+        self.palavra_aleatoria = random.choice(palavras).upper()
+        self.palavra_escondida = ['_' for _ in self.palavra_aleatoria]
+        self.mostrar_palavra()
+
+    def mostrar_palavra(self):
+        document['palavra'].html = ' '.join(self.palavra_escondida)
+        document['dica'].html = f"Categoria: {self.categoria_aleatoria}"
+        
+        letras_div = document['letras']
+        letras_div.html = ''
+        for i in range(65, 91):
+            letra = chr(i)
+            letra_element = html.SPAN(letra, Class='letra')
+            if letra in self.letras_chutadas:
+                letra_element.classList.add('letra-chutada')
+            else:
+                letra_element.bind('click', lambda ev, l=letra: self.verificar_letra(l))
+            letras_div <= letra_element
+
+    def verificar_letra(self, letra):
+        if letra in self.letras_chutadas:
+            return
+        
+        self.letras_chutadas.append(letra)
+        
+        if letra in self.palavra_aleatoria:
+            for i, char in enumerate(self.palavra_aleatoria):
+                if char == letra:
+                    self.palavra_escondida[i] = letra
+            self.mostrar_palavra()
+            
+            if ''.join(self.palavra_escondida) == self.palavra_aleatoria:
+                alert('Parabéns! Você ganhou!')
+                self.reiniciar_jogo()
+        else:
+            self.erros += 1
+            self.desenhar_forca()
+            document['erros'].text = f'Erros: {self.erros}'
+            
+            if self.erros == self.max_erros:
+                alert(f'Você perdeu! A palavra era: {self.palavra_aleatoria}')
+                self.reiniciar_jogo()
+
+    def desenhar_forca(self):
+        canvas = document['forcaCanvas']
+        ctx = canvas.getContext('2d')
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        ctx.strokeStyle = '#2c3e50'
+        ctx.lineWidth = 2
+
+        # Base da forca
+        ctx.beginPath()
+        ctx.moveTo(20, 230)
+        ctx.lineTo(180, 230)
+        ctx.stroke()
+
+        # Poste vertical
+        ctx.beginPath()
+        ctx.moveTo(40, 230)
+        ctx.lineTo(40, 20)
+        ctx.stroke()
+
+        # Topo
+        ctx.beginPath()
+        ctx.moveTo(40, 20)
+        ctx.lineTo(120, 20)
+        ctx.stroke()
+
+        # Corda
+        ctx.beginPath()
+        ctx.moveTo(120, 20)
+        ctx.lineTo(120, 40)
+        ctx.stroke()
+
+        # Desenho do boneco baseado no número de erros
+        if self.erros >= 1:
+            # Cabeça
+            ctx.beginPath()
+            ctx.arc(120, 60, 20, 0, math.pi * 2)
+            ctx.stroke()
+        
+        if self.erros >= 2:
+            # Corpo
+            ctx.beginPath()
+            ctx.moveTo(120, 80)
+            ctx.lineTo(120, 150)
+            ctx.stroke()
+        
+        if self.erros >= 3:
+            # Braço esquerdo
+            ctx.beginPath()
+            ctx.moveTo(120, 100)
+            ctx.lineTo(80, 120)
+            ctx.stroke()
+        
+        if self.erros >= 4:
+            # Braço direito
+            ctx.beginPath()
+            ctx.moveTo(120, 100)
+            ctx.lineTo(160, 120)
+            ctx.stroke()
+        
+        if self.erros >= 5:
+            # Perna esquerda
+            ctx.beginPath()
+            ctx.moveTo(120, 150)
+            ctx.lineTo(90, 190)
+            ctx.stroke()
+        
+        if self.erros >= 6:
+            # Perna direita
+            ctx.beginPath()
+            ctx.moveTo(120, 150)
+            ctx.lineTo(150, 190)
+            ctx.stroke()
+        
+        if self.erros >= 7:
+            # X nos olhos
+            ctx.beginPath()
+            ctx.moveTo(110, 55)
+            ctx.lineTo(120, 65)
+            ctx.moveTo(120, 55)
+            ctx.lineTo(110, 65)
+            ctx.moveTo(120, 55)
+            ctx.lineTo(130, 65)
+            ctx.moveTo(130, 55)
+            ctx.lineTo(120, 65)
+            ctx.stroke()
+
+    def reiniciar_jogo(self):
+        self.palavra_aleatoria = ''
+        self.categoria_aleatoria = ''
+        self.letras_chutadas = []
+        self.erros = 0
+        self.palavra_escondida = []
+        document['erros'].text = ''
+        self.escolher_palavra()
+        self.desenhar_forca()
+
+# Inicia o jogo
+jogo = JogoForca()
+    </script>
+</body>
+</html>

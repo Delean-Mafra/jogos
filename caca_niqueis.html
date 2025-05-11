@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo Caça-Níqueis</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('https://oquefazeremvegas.com/wp-content/uploads/2019/05/caesars-palace-las-vegas-cassino.jpg');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: rgb(5, 5, 5);
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.8); /* Cor de fundo semitransparente */
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            width: 300px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .saldo {
+            margin-bottom: 20px;
+        }
+
+        .apostas input {
+            width: 80%;
+            padding: 8px;
+            margin-right: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .apostas button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #28a745;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .apostas button:hover {
+            background-color: #218838;
+        }
+
+        .roda {
+            margin-top: 20px;
+        }
+
+        .roda div {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            background-color: #ddd;
+            margin: 5px;
+            line-height: 50px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            border-radius: 4px;
+        }
+
+        .mensagem {
+            margin-top: 20px;
+            font-size: 16px;
+            color: #555;
+        }
+    </style>
+    <!-- Inclusão do Brython e Tesseract.js -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3/brython.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3/brython_stdlib.js"></script>
+</head>
+<body onload="brython()">
+    <div class="container">
+        <h1>Jogo Caça-Níqueis</h1>
+        <div class="saldo">
+            <p>Saldo Atual: <span id="saldo">100</span> R$</p>
+        </div>
+        <div class="apostas">
+            <input type="number" id="aposta" placeholder="Valor da aposta" min="1" max="100">
+            <button id="rodar">Rodar</button>
+        </div>
+        <div class="resultado">
+            <p id="mensagem">Aposte e pressione 'Rodar'.</p>
+        </div>
+        <div class="roda">
+            <div id="imagem1">?</div>
+            <div id="imagem2">?</div>
+            <div id="imagem3">?</div>
+        </div>
+    </div>
+
+    <script type="text/python">
+        from browser import document, window
+
+        saldo = 100
+
+        def rodar(ev):
+            global saldo
+            aposta = float(document['aposta'].value)
+            saldo_element = document['saldo']
+            mensagem_element = document['mensagem']
+            imagens = ['7', 'A', 'B', 'C']  # Possíveis imagens
+
+            if aposta <= 0 or aposta > saldo:
+                mensagem_element.text = 'Valor inválido ou saldo insuficiente.'
+                return
+
+            # Descontar a aposta do saldo
+            saldo -= aposta
+            saldo_element.text = f'{saldo:.2f}'
+
+            # Simular a rotação da máquina
+            resultado = [window.Math.random() * len(imagens) for _ in range(3)]
+            resultado = [imagens[int(r)] for r in resultado]
+
+            # Exibir as imagens na tela
+            document['imagem1'].text = resultado[0]
+            document['imagem2'].text = resultado[1]
+            document['imagem3'].text = resultado[2]
+
+            # Verificar se os 3 números são iguais
+            if resultado[0] == resultado[1] == resultado[2]:
+                if resultado[0] == '7':
+                    # Ganho especial com 7
+                    saldo += aposta * 10
+                    mensagem_element.text = f'Você ganhou 10x o valor apostado! Novo saldo: R$ {saldo:.2f}'
+                else:
+                    # Ganho normal
+                    saldo += aposta * 2
+                    mensagem_element.text = f'Você ganhou o dobro do valor apostado! Novo saldo: R$ {saldo:.2f}'
+            else:
+                mensagem_element.text = f'Não houve ganho. Novo saldo: R$ {saldo:.2f}'
+
+            saldo_element.text = f'{saldo:.2f}'
+
+        # Associar a função ao botão
+        document['rodar'].bind('click', rodar)
+    </script>
+</body>
+</html>
