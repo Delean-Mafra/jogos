@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo de Casos Criminais – O Arquivo Sombrio</title>
+    <style>
+        /* Base styles and fonts */
+@font-face {
+    font-family: 'Detective';
+    src: url('');
+}
+
+:root {
+    --dark-brown: #2a1a12;
+    --aged-paper: #f2e8c9;
+    --wine-red: #5e1914;
+    --faded-black: #1a1a1a;
+    --typewriter-font: 'Special Elite', 'Courier New', monospace;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--typewriter-font);
+    background-color: #1a1a1a;
+    color: var(--faded-black);
+    line-height: 1.6;
+    position: relative;
+    height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Texture overlays */
+.noise-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('');
+    opacity: 0.05;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.paper-texture {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('');
+    opacity: 0.1;
+    pointer-events: none;
+    z-index: 999;
+}
+
+/* Login Screen */
+.login-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--dark-brown);
+    z-index: 2000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.8s ease;
+}
+
+.login-container {
+    background-color: var(--aged-paper);
+    width: 90%;
+    max-width: 800px;
+    padding: 40px;
+    border-radius: 5px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
+    position: relative;
+    overflow: hidden;
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 30px;
+    color: var(--wine-red);
+}
+
+.login-header h1 {
+    font-size: 28px;
+    letter-spacing: 1px;
+}
+
+.login-header h2 {
+    font-size: 22px;
+    margin-top: 5px;
+}
+
+.login-header h3 {
+    font-size: 18px;
+    margin-top: 15px;
+    text-decoration: underline;
+}
+
+.typewriter {
+    border-left: 4px solid var(--wine-red);
+    padding-left: 20px;
+    margin: 30px 0;
+}
+
+.typewriter p {
+    font-size: 18px;
+    margin-bottom: 10px;
+    opacity: 0;
+    animation: fadeIn 0.5s forwards;
+}
+
+.typewriter p:first-child {
+    animation-delay: 0.5s;
+}
+
+.typewriter p:last-child {
+    animation-delay: 1.5s;
+}
+
+@keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+.login-form {
+    margin-top: 30px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    background-color: rgba(255, 255, 255, 0.6);
+    border: 1px solid var(--dark-brown);
+    font-family: var(--typewriter-font);
+    font-size: 16px;
+    letter-spacing: 1px;
+}
+
+button {
+    background-color: var(--wine-red);
+    color: var(--aged-paper);
+    border: none;
+    padding: 12px 25px;
+    font-family: var(--typewriter-font);
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+button:hover {
+    background-color: #471210;
+    box-shadow: 0 0 8px rgba(94, 25, 20, 0.7);
+}
+
+.stamp {
+    position: absolute;
+    top: 40px;
+    right: 30px;
+    transform: rotate(15deg);
+    font-size: 24px;
+    font-weight: bold;
+    color: rgba(94, 25, 20, 0.8);
+    border: 3px solid rgba(94, 25, 20, 0.8);
+    padding: 8px 12px;
+    border-radius: 5px;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
+    pointer-events: none;
+}
+
+/* Main Game Container */
+.game-container {
+    display: none;
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: var(--aged-paper);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    position: relative;
+    min-height: calc(100vh - 40px);
+    z-index: 10;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-bottom: 20px;
+    border-bottom: 2px solid var(--dark-brown);
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.header-content {
+    width: 85%;
+}
+
+header h1 {
+    font-size: 24px;
+    color: var(--wine-red);
+    margin-bottom: 10px;
+}
+
+.case-title {
+    display: flex;
+    align-items: flex-end;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.case-title h2 {
+    font-size: 22px;
+    color: var(--dark-brown);
+}
+
+.case-title h3 {
+    font-size: 18px;
+    color: var(--wine-red);
+    font-style: italic;
+}
+
+.date-display {
+    margin-top: 10px;
+    font-size: 16px;
+    color: var(--dark-brown);
+}
+
+/* Tab navigation */
+.tabs {
+    display: flex;
+    margin: 20px 0;
+    border-bottom: 1px solid var(--dark-brown);
+    position: relative;
+    z-index: 1;
+}
+
+.tab-btn {
+    background-color: transparent;
+    color: var(--dark-brown);
+    border: 1px solid var(--dark-brown);
+    border-bottom: none;
+    padding: 10px 20px;
+    margin-right: 5px;
+    cursor: pointer;
+    position: relative;
+    top: 1px;
+    transition: all 0.3s;
+}
+
+.tab-btn.active {
+    background-color: var(--aged-paper);
+    color: var(--wine-red);
+    border-top: 3px solid var(--wine-red);
+}
+
+.tab-btn:hover:not(.active) {
+    background-color: rgba(94, 25, 20, 0.1);
+}
+
+.tab-content {
+    min-height: 500px;
+    position: relative;
+}
+
+.tab-pane {
+    display: none;
+}
+
+.tab-pane.active {
+    display: block;
+    animation: fadeIn 0.5s forwards;
+}
+
+/* Case file section */
+.file-container {
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.5);
+    border: 1px solid var(--dark-brown);
+    position: relative;
+}
+
+.file-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed var(--dark-brown);
+}
+
+.file-label {
+    font-weight: bold;
+    font-size: 18px;
+    color: var(--wine-red);
+}
+
+.victim-info {
+    display: flex;
+    margin-bottom: 30px;
+    gap: 30px;
+}
+
+.victim-photo {
+    width: 200px;
+    position: relative;
+}
+
+.victim-photo img {
+    width: 100%;
+    border: 1px solid var(--dark-brown);
+    filter: grayscale(100%);
+}
+
+.photo-caption {
+    text-align: center;
+    margin-top: 5px;
+    font-size: 14px;
+    font-style: italic;
+}
+
+.victim-details {
+    flex-grow: 1;
+}
+
+.victim-details h3, .case-description h3, .persons-of-interest h3, .case-status h3 {
+    color: var(--wine-red);
+    margin-bottom: 10px;
+    font-size: 16px;
+    text-decoration: underline;
+}
+
+.case-description, .persons-of-interest {
+    margin-bottom: 20px;
+}
+
+.highlight {
+    background-color: rgba(94, 25, 20, 0.1);
+    padding: 5px;
+    border-left: 3px solid var(--wine-red);
+    margin: 15px 0;
+}
+
+.persons-of-interest ul {
+    list-style-type: square;
+    margin-left: 20px;
+}
+
+.case-status {
+    margin-top: 30px;
+}
+
+.case-status p {
+    color: var(--wine-red);
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.file-footer {
+    margin-top: 30px;
+    padding-top: 15px;
+    border-top: 1px dashed var(--dark-brown);
+    position: relative;
+}
+
+.paper-clip {
+    position: absolute;
+    top: -20px;
+    right: 30px;
+    width: 30px;
+    height: 80px;
+    background: url('') no-repeat;
+    background-size: contain;
+    transform: rotate(10deg);
+}
+
+/* Clues section */
+.clues-container {
+    padding: 20px;
+}
+
+.clue-instruction {
+    text-align: center;
+    margin-bottom: 30px;
+    color: var(--wine-red);
+    border-bottom: 1px solid var(--dark-brown);
+    padding-bottom: 10px;
+}
+
+.clue-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.clue-card {
+    height: 200px;
+    perspective: 1000px;
+    cursor: pointer;
+    position: relative;
+}
+
+.clue-front, .clue-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    transition: transform 0.8s;
+    transform-style: preserve-3d;
+}
+
+.clue-front {
+    background-color: var(--aged-paper);
+    border: 1px solid var(--dark-brown);
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    transform: rotateY(0deg);
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.clue-back {
+    background-color: white;
+    border: 1px solid var(--dark-brown);
+    padding: 15px;
+    transform: rotateY(180deg);
+    overflow-y: auto;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.clue-card.flipped .clue-front {
+    transform: rotateY(180deg);
+}
+
+.clue-card.flipped .clue-back {
+    transform: rotateY(0deg);
+}
+
+.folder-tab {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: var(--wine-red);
+    color: var(--aged-paper);
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.clue-image {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.clue-image img {
+    max-width: 100%;
+    height: auto;
+    max-height: 150px;
+    border: 1px solid #ccc;
+}
+
+.clue-description {
+    font-size: 14px;
+}
+
+.clue-description h4 {
+    color: var(--wine-red);
+    margin-bottom: 8px;
+    text-decoration: underline;
+}
+
+.evidence-note {
+    margin-top: 10px;
+    font-style: italic;
+    padding: 5px;
+    background-color: rgba(94, 25, 20, 0.05);
+    border-left: 2px solid var(--wine-red);
+}
+
+.diary-entry, .transcript {
+    font-style: italic;
+    margin-bottom: 8px;
+}
+
+/* Notes section */
+.notes-container {
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.5);
+    border: 1px solid var(--dark-brown);
+}
+
+.notes-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--dark-brown);
+}
+
+#detective-notes {
+    width: 100%;
+    height: 400px;
+    padding: 15px;
+    background-color: rgba(255, 255, 255, 0.7);
+    border: 1px solid var(--dark-brown);
+    font-family: var(--typewriter-font);
+    font-size: 16px;
+    line-height: 1.6;
+    resize: vertical;
+}
+
+#saveNotes {
+    margin-top: 15px;
+    float: right;
+}
+
+/* Conclusion section */
+.conclusion-container {
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.5);
+    border: 1px solid var(--dark-brown);
+}
+
+.conclusion-container h3 {
+    text-align: center;
+    color: var(--wine-red);
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--dark-brown);
+}
+
+.conclusion-form {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.form-section {
+    margin-bottom: 20px;
+}
+
+.form-section label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.form-section select, .form-section textarea {
+    width: 100%;
+    padding: 12px;
+    background-color: rgba(255, 255, 255, 0.7);
+    border: 1px solid var(--dark-brown);
+    font-family: var(--typewriter-font);
+    font-size: 16px;
+}
+
+.form-section textarea {
+    height: 150px;
+    resize: vertical;
+}
+
+#solveCase {
+    display: block;
+    margin: 30px auto 0;
+    padding: 12px 30px;
+    font-size: 18px;
+    background-color: var(--wine-red);
+}
+
+/* Solution modal */
+.solution-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 3000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: var(--aged-paper);
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 30px;
+    border: 2px solid var(--wine-red);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    position: relative;
+}
+
+.modal-header {
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--dark-brown);
+    position: relative;
+}
+
+.modal-header h3 {
+    text-align: center;
+    color: var(--wine-red);
+    font-size: 24px;
+}
+
+.close-modal {
+    position: absolute;
+    top: 0;
+    right: 0;
+    font-size: 28px;
+    cursor: pointer;
+}
+
+.modal-body {
+    margin-bottom: 30px;
+}
+
+.modal-body h4 {
+    color: var(--wine-red);
+    margin-bottom: 15px;
+    font-size: 18px;
+}
+
+.modal-body p {
+    margin-bottom: 15px;
+    font-size: 16px;
+}
+
+.solution-section {
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed var(--dark-brown);
+}
+
+.solution-section:last-child {
+    border-bottom: none;
+}
+
+.modal-footer {
+    text-align: center;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 2px solid var(--dark-brown);
+    position: relative;
+}
+
+.stamp-result {
+    position: absolute;
+    top: -30px;
+    right: 30px;
+    transform: rotate(15deg);
+    font-size: 28px;
+    font-weight: bold;
+    padding: 10px 15px;
+    border-radius: 5px;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
+}
+
+.stamp-success {
+    color: darkgreen;
+    border: 4px solid darkgreen;
+}
+
+.stamp-fail {
+    color: darkred;
+    border: 4px solid darkred;
+}
+
+.close-btn {
+    padding: 10px 25px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .victim-info {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .clue-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    header {
+        flex-direction: column;
+    }
+    
+    .header-content {
+        width: 100%;
+    }
+    
+    .case-title {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+    
+    .stamp {
+        position: relative;
+        top: auto;
+        right: auto;
+        margin: 20px auto;
+        transform: rotate(15deg);
+        width: fit-content;
+    }
+    
+    .tabs {
+        flex-wrap: wrap;
+    }
+    
+    .tab-btn {
+        margin-bottom: 5px;
+    }
+}
+
+
+
+    </style>
+    <link href="" rel="stylesheet">
+</head>
+<body>
+    <div class="noise-overlay"></div>
+    <div class="paper-texture"></div>
+    
+    <div class="login-screen" id="loginScreen">
+        <div class="login-container">
+            <div class="login-header">
+                <h1>DIVISÃO DE CRIMES COMPLEXOS</h1>
+                <h2>SÃO JOSÉ - SC</h2>
+                <h3>SISTEMA DE ARQUIVOS CONFIDENCIAIS</h3>
+            </div>
+            <div class="typewriter">
+                <p>ACESSO RESTRITO</p>
+                <p>DIGITE SUAS CREDENCIAIS</p>
+            </div>
+            <div class="login-form">
+                <div class="form-group">
+                    <label for="username">IDENTIFICAÇÃO:</label>
+                    <input type="text" id="username" placeholder="DETETIVE">
+                </div>
+                <div class="form-group">
+                    <label for="password">SENHA:</label>
+                    <input type="password" id="password" placeholder="********">
+                </div>
+                <button id="loginBtn">ACESSAR ARQUIVOS</button>
+            </div>
+            <div class="stamp">CONFIDENCIAL</div>
+        </div>
+    </div>
+    
+    <div class="game-container" id="gameContainer">
+        <header>
+            <div class="header-content">
+                <h1>DIVISÃO DE CRIMES COMPLEXOS - SÃO JOSÉ</h1>
+                <div class="case-title">
+                    <h2>CASO: O ÚLTIMO BAILE</h2>
+                    <h3>ARQUIVO #1976-A</h3>
+                </div>
+                <div class="date-display" id="dateDisplay">11/05/1976</div>
+            </div>
+            <div class="stamp">CONFIDENCIAL</div>
+        </header>
+        
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="case-file">FICHA DO CASO</button>
+            <button class="tab-btn" data-tab="clues">PISTAS</button>
+            <button class="tab-btn" data-tab="notes">ANOTAÇÕES</button>
+            <button class="tab-btn" data-tab="conclude">CONCLUIR CASO</button>
+        </div>
+        
+        <div class="tab-content">
+            <div class="tab-pane active" id="case-file">
+                <div class="file-container">
+                    <div class="file-header">
+                        <div class="file-label">RELATÓRIO PRELIMINAR</div>
+                        <div class="file-date">Data: 15/06/1976</div>
+                    </div>
+                    <div class="victim-info">
+                        <div class="victim-photo">
+                            <img src="imagem/vitima.png" alt="Vítima">
+                            <div class="photo-caption">Cecília Muniz, 27 anos</div>
+                        </div>
+                        <div class="victim-details">
+                            <h3>VÍTIMA:</h3>
+                            <p>Nome: Cecília Muniz</p>
+                            <p>Idade: 27 anos</p>
+                            <p>Ocupação: Advogada</p>
+                            <p>Filiação: Filha do Promotor Estadual Alberto Muniz</p>
+                            <h3>DATA DO ÓBITO:</h3>
+                            <p>10/06/1976</p>
+                            <h3>LOCAL:</h3>
+                            <p>Mansão Ribeiro, durante baile beneficente</p>
+                        </div>
+                    </div>
+                    <div class="case-description">
+                        <h3>DESCRIÇÃO DO CASO:</h3>
+                        <p>Em 10 de junho de 1976, durante o baile beneficente anual realizado na Mansão Ribeiro, a vítima Cecília Muniz foi encontrada sem vida após aparentemente sofrer um colapso súbito. Testemunhas relatam que a vítima havia acabado de tomar uma taça de champanhe quando levou as mãos ao peito e caiu no chão. O médico presente no local atestou morte por parada cardíaca.</p>
+                        <p>Conclusão inicial: Morte natural por infarto.</p>
+                        <p class="highlight">NOVA EVIDÊNCIA (1981): Carta anônima recebida pelo departamento sugere envenenamento deliberado e possível acobertamento do crime. Caso reaberto para investigação confidencial.</p>
+                    </div>
+                    <div class="persons-of-interest">
+                        <h3>PESSOAS DE INTERESSE:</h3>
+                        <ul>
+                            <li>Enrico Muniz - Meio-irmão da vítima</li>
+                            <li>Clara Oliveira - Empregada da Mansão Ribeiro</li>
+                            <li>Fernando Ribeiro - Anfitrião do baile</li>
+                            <li>Teresa Vaz - Melhor amiga da vítima</li>
+                        </ul>
+                    </div>
+                    <div class="case-status">
+                        <h3>STATUS ATUAL:</h3>
+                        <p>EM INVESTIGAÇÃO</p>
+                    </div>
+                    <div class="file-footer">
+                        <div>INVESTIGADOR RESPONSÁVEL: <span id="detectiveName">___________</span></div>
+                        <div class="paper-clip"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-pane" id="clues">
+                <div class="clues-container">
+                    <h3 class="clue-instruction">SELECIONE UMA PISTA PARA ANALISAR</h3>
+                    <div class="clue-grid">
+                        <div class="clue-card" data-clue="1">
+                            <div class="clue-front">
+                                <div class="folder-tab">EVIDÊNCIA #1</div>
+                                <h4>Taça de Cristal</h4>
+                                <p>Recuperada da cena do crime</p>
+                            </div>
+                            <div class="clue-back">
+                                <div class="clue-image">
+                                    <img src="imagem/taca.png" alt="Taça de Cristal">
+                                </div>
+                                <div class="clue-description">
+                                    <h4>LAUDO TÉCNICO:</h4>
+                                    <p>Taça de cristal com resíduos químicos esbranquiçados no fundo. Análise laboratorial detectou traços compatíveis com composto de cianureto. Impressões digitais parciais da vítima e do garçom.</p>
+                                    <div class="evidence-note">Nota: A substância encontrada é inodora e altamente letal quando ingerida.</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="clue-card" data-clue="2">
+                            <div class="clue-front">
+                                <div class="folder-tab">EVIDÊNCIA #2</div>
+                                <h4>Bilhete Amassado</h4>
+                                <p>Encontrado próximo à cena</p>
+                            </div>
+                            <div class="clue-back">
+                                <div class="clue-image">
+                                    <img src="imagem/bilhete_amassado.png" alt="Bilhete Amassado">
+                                </div>
+                                <div class="clue-description">
+                                    <h4>ANÁLISE DOCUMENTOSCÓPICA:</h4>
+                                    <p>Bilhete escrito à mão em papel comum com a mensagem: "Ela não pode ficar com tudo."</p>
+                                    <p>Impressão digital masculina parcial encontrada na margem inferior direita. Não há correspondência nos registros de convidados do evento.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="clue-card" data-clue="3">
+                            <div class="clue-front">
+                                <div class="folder-tab">EVIDÊNCIA #3</div>
+                                <h4>Testemunho do Garçom</h4>
+                                <p>Entrevista de Pedro Souza</p>
+                            </div>
+                            <div class="clue-back">
+                                <div class="clue-image">
+                                    <img src="imagem/garcon.png" alt="Garçom">
+                                </div>
+                                <div class="clue-description">
+                                    <h4>DEPOIMENTO OFICIAL:</h4>
+                                    <p>"Vi a empregada Clara mexendo nas taças antes de servir o champanhe. Quando questionei, ela disse que estava apenas limpando resíduos. Parecia nervosa e olhava constantemente para o Sr. Enrico Muniz, que estava do outro lado do salão."</p>
+                                    <div class="evidence-note">Obs: Garçom confirmou que Clara foi a única pessoa com acesso às bebidas antes do serviço.</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="clue-card" data-clue="4">
+                            <div class="clue-front">
+                                <div class="folder-tab">EVIDÊNCIA #4</div>
+                                <h4>Diário Pessoal</h4>
+                                <p>Pertencente à vítima</p>
+                            </div>
+                            <div class="clue-back">
+                                <div class="clue-image">
+                                    <img src="imagem/diario.png" alt="Diário Pessoal">
+                                </div>
+                                <div class="clue-description">
+                                    <h4>ENTRADAS RELEVANTES:</h4>
+                                    <p class="diary-entry">5 de junho, 1976 - "Enrico me odeia. Ele não aceita que sou herdeira legítima. Ontem, disse que 'situações como essa sempre encontram uma solução natural'. Senti um arrepio. Estou com medo."</p>
+                                    <p class="diary-entry">8 de junho, 1976 - "O baile da Mansão Ribeiro é depois de amanhã. Tenho que comparecer, papai insiste. Enrico estará lá com aquela empregada que ele pensa que ninguém sabe sobre. Tenho evitado comer ou beber qualquer coisa quando ele está por perto."</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="clue-card" data-clue="5">
+                            <div class="clue-front">
+                                <div class="folder-tab">EVIDÊNCIA #5</div>
+                                <h4>Inventário Judicial</h4>
+                                <p>Documento oficial</p>
+                            </div>
+                            <div class="clue-back">
+                                <div class="clue-image">
+                                    <img src="imagem/judicial.png" alt="Documento Judicial">
+                                </div>
+                                <div class="clue-description">
+                                    <h4>PROCESSO DE HERANÇA #45.876-1976:</h4>
+                                    <p>Disputa judicial entre Cecília Muniz e Enrico Muniz pela propriedade rural "Fazenda Bom Retiro", avaliada em 3 milhões de cruzeiros.</p>
+                                    <p>Audiência final agendada para: 17/06/1976 (uma semana após o falecimento)</p>
+                                    <div class="evidence-note">Parecer preliminar do juiz (confidencial): Favorável à Srta. Cecília Muniz como herdeira universal.</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="clue-card" data-clue="6">
+                            <div class="clue-front">
+                                <div class="folder-tab">EVIDÊNCIA #6</div>
+                                <h4>Escuta Telefônica</h4>
+                                <p>Gravação anônima (1981)</p>
+                            </div>
+                            <div class="clue-back">
+                                <div class="clue-image">
+                                    <img src="imagem/fita.png" alt="Fita de Gravação">
+                                </div>
+                                <div class="clue-description">
+                                    <h4>TRANSCRIÇÃO DA GRAVAÇÃO:</h4>
+                                    <p class="transcript"><strong>Voz masculina:</strong> "Você limpou bem tudo naquela noite?"</p>
+                                    <p class="transcript"><strong>Voz feminina:</strong> "Sim, senhor. Ninguém suspeita de nada."</p>
+                                    <p class="transcript"><strong>Voz masculina:</strong> "Ótimo. Você sabe que não devemos nunca mais falar sobre isso."</p>
+                                    <p class="transcript"><strong>Voz feminina:</strong> "Ele me prometeu que íamos sumir depois da partilha..."</p>
+                                    <div class="evidence-note">Análise de voz (preliminar): Compatível com Enrico Muniz e Clara Oliveira.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-pane" id="notes">
+                <div class="notes-container">
+                    <div class="notes-header">
+                        <h3>ANOTAÇÕES DO INVESTIGADOR</h3>
+                        <div class="notes-date" id="notesDate">Data: 11/05/1976</div>
+                    </div>
+                    <textarea id="detective-notes" placeholder="Digite suas anotações e teorias sobre o caso..."></textarea>
+                    <button id="saveNotes">ARQUIVAR ANOTAÇÕES</button>
+                </div>
+            </div>
+            
+            <div class="tab-pane" id="conclude">
+                <div class="conclusion-container">
+                    <h3>RESOLUÇÃO DO CASO</h3>
+                    <div class="conclusion-form">
+                        <div class="form-section">
+                            <label>PRINCIPAL SUSPEITO:</label>
+                            <select id="culprit">
+                                <option value="">Selecione o culpado...</option>
+                                <option value="enrico">Enrico Muniz</option>
+                                <option value="clara">Clara Oliveira</option>
+                                <option value="fernando">Fernando Ribeiro</option>
+                                <option value="teresa">Teresa Vaz</option>
+                            </select>
+                        </div>
+                        <div class="form-section">
+                            <label>CÚMPLICE (SE HOUVER):</label>
+                            <select id="accomplice">
+                                <option value="">Selecione o cúmplice...</option>
+                                <option value="none">Não houve cúmplice</option>
+                                <option value="enrico">Enrico Muniz</option>
+                                <option value="clara">Clara Oliveira</option>
+                                <option value="fernando">Fernando Ribeiro</option>
+                                <option value="teresa">Teresa Vaz</option>
+                            </select>
+                        </div>
+                        <div class="form-section">
+                            <label>MOTIVO DO CRIME:</label>
+                            <select id="motive">
+                                <option value="">Selecione o motivo...</option>
+                                <option value="inheritance">Disputa de herança</option>
+                                <option value="revenge">Vingança pessoal</option>
+                                <option value="passion">Crime passional</option>
+                                <option value="accident">Acidente não intencional</option>
+                            </select>
+                        </div>
+                        <div class="form-section">
+                            <label>SUA TEORIA DO CRIME:</label>
+                            <textarea id="theory" placeholder="Descreva brevemente como você acredita que o crime ocorreu..."></textarea>
+                        </div>
+                        <button id="solveCase">REVELAR SOLUÇÃO</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="solution-modal" id="solutionModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>RESOLUÇÃO OFICIAL DO CASO</h3>
+                    <span class="close-modal">&times;</span>
+                </div>
+                <div class="modal-body" id="modalBody">
+                    <!-- Conteúdo preenchido por JavaScript -->
+                </div>
+                <div class="modal-footer">
+                    <div class="stamp-result" id="resultStamp"></div>
+                    <button class="close-btn">FECHAR ARQUIVO</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <audio id="typewriter" src="https://assets.codepen.io/1462889/typewriter.mp3" preload="auto"></audio>
+    <audio id="paper" src="https://assets.codepen.io/1462889/paper-sound.mp3" preload="auto"></audio>
+    <audio id="ambient" src="https://assets.codepen.io/1462889/rain-office.mp3" loop preload="auto"></audio>
+    
+    <script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Audio elements
+    const typewriterSound = document.getElementById("typewriter");
+    const paperSound = document.getElementById("paper");
+    const ambientSound = document.getElementById("ambient");
+    
+    // Login functionality
+    const loginScreen = document.getElementById("loginScreen");
+    const loginBtn = document.getElementById("loginBtn");
+    const gameContainer = document.getElementById("gameContainer");
+    const usernameInput = document.getElementById("username");
+    
+    loginBtn.addEventListener("click", function() {
+        if (usernameInput.value.trim() !== "") {
+            playSound(typewriterSound);
+            loginScreen.style.opacity = "0";
+            
+            setTimeout(() => {
+                loginScreen.style.display = "none";
+                gameContainer.style.display = "block";
+                
+                // Set detective name
+                document.getElementById("detectiveName").textContent = usernameInput.value;
+                
+                // Play ambient sound
+                playSound(ambientSound, 0.3);
+                ambientSound.loop = true;
+            }, 800);
+        } else {
+            alert("Por favor, insira sua identificação de detetive.");
+        }
+    });
+    
+    // Tab navigation
+    const tabBtns = document.querySelectorAll(".tab-btn");
+    tabBtns.forEach(btn => {
+        btn.addEventListener("click", function() {
+            // Remove active class from all tabs
+            tabBtns.forEach(tab => tab.classList.remove("active"));
+            
+            // Add active class to clicked tab
+            this.classList.add("active");
+            
+            // Hide all tab panes
+            document.querySelectorAll(".tab-pane").forEach(pane => {
+                pane.classList.remove("active");
+            });
+            
+            // Show selected tab pane
+            const tabId = this.getAttribute("data-tab");
+            document.getElementById(tabId).classList.add("active");
+            
+            playSound(paperSound);
+        });
+    });
+    
+    // Clue card flip functionality
+    const clueCards = document.querySelectorAll(".clue-card");
+    let activeClue = null;
+    
+    clueCards.forEach(card => {
+        card.addEventListener("click", function() {
+            // If a clue is already active, flip it back first
+            if (activeClue && activeClue !== this) {
+                activeClue.classList.remove("flipped");
+            }
+            
+            // Toggle the clicked clue
+            this.classList.toggle("flipped");
+            
+            // Update the active clue
+            if (this.classList.contains("flipped")) {
+                activeClue = this;
+                playSound(paperSound);
+            } else {
+                activeClue = null;
+            }
+        });
+    });
+    
+    // Save notes functionality
+    const saveNotesBtn = document.getElementById("saveNotes");
+    const notesArea = document.getElementById("detective-notes");
+    
+    saveNotesBtn.addEventListener("click", function() {
+        if (notesArea.value.trim() !== "") {
+            localStorage.setItem("detectiveNotes", notesArea.value);
+            alert("Anotações arquivadas com sucesso.");
+            playSound(typewriterSound);
+        } else {
+            alert("Não há anotações para arquivar.");
+        }
+    });
+    
+    // Load saved notes if they exist
+    if (localStorage.getItem("detectiveNotes")) {
+        notesArea.value = localStorage.getItem("detectiveNotes");
+    }
+    
+    // Case solution functionality
+    const solveBtn = document.getElementById("solveCase");
+    const modal = document.getElementById("solutionModal");
+    const closeModal = document.querySelector(".close-modal");
+    const closeBtn = document.querySelector(".close-btn");
+    const modalBody = document.getElementById("modalBody");
+    const resultStamp = document.getElementById("resultStamp");
+    
+    solveBtn.addEventListener("click", function() {
+        const culprit = document.getElementById("culprit").value;
+        const accomplice = document.getElementById("accomplice").value;
+        const motive = document.getElementById("motive").value;
+        const theory = document.getElementById("theory").value;
+        
+        if (!culprit || !motive || theory.trim() === "") {
+            alert("Por favor, preencha todos os campos obrigatórios antes de concluir o caso.");
+            return;
+        }
+        
+        // Check if the solution is correct
+        const isCorrect = (culprit === "enrico" && accomplice === "clara" && motive === "inheritance");
+        
+        // Create solution content
+        let solutionHTML = `
+            <div class="solution-section">
+                <h4>SUA CONCLUSÃO:</h4>
+                <p><strong>Culpado Apontado:</strong> ${getPersonName(culprit)}</p>
+                <p><strong>Cúmplice Apontado:</strong> ${accomplice === "none" ? "Nenhum cúmplice" : getPersonName(accomplice)}</p>
+                <p><strong>Motivo Sugerido:</strong> ${getMotiveName(motive)}</p>
+                <p><strong>Sua Teoria:</strong> ${theory}</p>
+            </div>
+            
+            <div class="solution-section">
+                <h4>RESOLUÇÃO OFICIAL:</h4>
+                <p><strong>Culpado Real:</strong> Enrico Muniz</p>
+                <p><strong>Cúmplice:</strong> Clara Oliveira (empregada e amante)</p>
+                <p><strong>Motivo:</strong> Eliminar Cecília para herdar sozinho a propriedade avaliada em 3 milhões de cruzeiros</p>
+            </div>
+            
+            <div class="solution-section">
+                <h4>DESFECHO DO CASO:</h4>
+                <p>Enrico Muniz, meio-irmão da vítima, planejou o assassinato de Cecília Muniz para garantir a herança da Fazenda Bom Retiro. Ele contou com a ajuda de sua amante secreta, Clara Oliveira, que trabalhava como empregada na Mansão Ribeiro.</p>
+                <p>No dia 10 de junho de 1976, durante o baile beneficente, Clara colocou cianureto na taça de champanhe destinada a Cecília. O veneno, inodoro e altamente letal, provocou a morte quase instantânea da vítima, que foi inicialmente diagnosticada como infarto fulminante.</p>
+                <p>As evidências que os incriminaram foram a gravação anônima de 1981, as impressões digitais no bilhete e o testemunho do garçom que viu Clara manipulando a bebida.</p>
+                <p>Com a morte de Cecília, Enrico tornou-se o único herdeiro da propriedade. Contudo, ele nunca cumpriu a promessa feita a Clara de fugirem juntos após a partilha da herança.</p>
+            </div>
+        `;
+        
+        modalBody.innerHTML = solutionHTML;
+        
+        if (isCorrect) {
+            resultStamp.textContent = "CASO RESOLVIDO COM SUCESSO";
+            resultStamp.className = "stamp-result stamp-success";
+        } else {
+            resultStamp.textContent = "TEORIA INCONCLUSIVA";
+            resultStamp.className = "stamp-result stamp-fail";
+        }
+        
+        // Show modal
+        modal.style.display = "flex";
+    });
+    
+    // Close modal functionality
+    closeModal.addEventListener("click", function() {
+        modal.style.display = "none";
+    });
+    
+    closeBtn.addEventListener("click", function() {
+        modal.style.display = "none";
+    });
+    
+    // Close modal when clicking outside of it
+    window.addEventListener("click", function(event) {
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    });
+    
+    // Helper functions
+    function getPersonName(value) {
+        const people = {
+            "enrico": "Enrico Muniz",
+            "clara": "Clara Oliveira",
+            "fernando": "Fernando Ribeiro",
+            "teresa": "Teresa Vaz"
+        };
+        
+        return people[value] || "Desconhecido";
+    }
+    
+    function getMotiveName(value) {
+        const motives = {
+            "inheritance": "Disputa de herança",
+            "revenge": "Vingança pessoal",
+            "passion": "Crime passional",
+            "accident": "Acidente não intencional"
+        };
+        
+        return motives[value] || "Desconhecido";
+    }
+    
+    function playSound(sound, volume = 0.5) {
+        sound.volume = volume;
+        sound.currentTime = 0;
+        sound.play().catch(err => console.log("Audio playback error:", err));
+    }
+    
+    // Set current date
+    const today = new Date();
+    const day = String(today.getDate()).padStart(2, '0');
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const year = today.getFullYear();
+    
+    document.getElementById("notesDate").textContent = `Data: ${day}/${month}/${year}`;
+});
+
+
+    </script>
+</body>
+</html>
